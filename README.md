@@ -38,13 +38,11 @@ npm run preview  # معاينة البناء
 
 <div dir="rtl">
 
-## 🔑 ربط كتالوج حقيقي (TMDB)
+## 🔑 الكتالوج الحقيقي (TMDB)
 
-بدون أي إعداد يعمل التطبيق على كتالوج تجريبي. للبحث في ملايين المسلسلات والأفلام الحقيقية (بالعربية أيضاً):
+التطبيق **مضبوط مسبقاً بمفتاح TMDB** فيعمل البحث في ملايين المسلسلات والأفلام الحقيقية مباشرة (بالعربية أيضاً) — تُجلب المواسم والحلقات ومواعيد العرض تلقائياً.
 
-1. أنشئ حساباً مجانياً في [themoviedb.org](https://www.themoviedb.org/) واطلب مفتاح API من الإعدادات.
-2. في التطبيق: **حسابي ← الإعدادات ← مفتاح TMDB API** والصق المفتاح (يقبل مفتاح v3 أو توكن القراءة v4).
-3. ابحث وأضف — تُجلب المواسم والحلقات ومواعيد العرض تلقائياً، وتُعرض البيانات بالعربية عند اختيار اللغة العربية.
+لاستبدال المفتاح بمفتاحك الخاص: أنشئ حساباً مجانياً في [themoviedb.org](https://www.themoviedb.org/) واطلب مفتاح API، ثم الصقه في **حسابي ← الإعدادات ← مفتاح TMDB API** (يقبل مفتاح v3 أو توكن القراءة v4). ولو حُذف المفتاح يعود التطبيق للكتالوج التجريبي المدمج.
 
 ## 🌍 النشر على GitHub Pages
 
@@ -86,7 +84,7 @@ Built to the bundled "Cinematic Core" design system (dark cinema theme, golden a
 
 **Plus what it never gave you**: full privacy (all data in localStorage), one-tap **JSON backup export/import**, Arabic + English with full RTL, and an installable offline-capable **PWA** with self-hosted fonts & icons.
 
-**Getting real data**: the app ships with a built-in demo catalog and works with zero setup. To search the real catalog, get a free API key at [themoviedb.org](https://www.themoviedb.org/) and paste it in **Profile → Settings → TMDB API Key** (v3 key or v4 read token). Seasons, episodes and air dates are then fetched automatically — localized to Arabic when the UI language is Arabic.
+**Real data**: the app ships preconfigured with a TMDB API key, so searching the real catalog works out of the box — seasons, episodes and air dates are fetched automatically, localized to Arabic when the UI language is Arabic. You can swap in your own free key from [themoviedb.org](https://www.themoviedb.org/) in **Profile → Settings → TMDB API Key** (v3 key or v4 read token); with no key at all the app falls back to its built-in demo catalog.
 
 **Deploying**: `npm run build` produces a relocatable static `dist/`; a GitHub Pages workflow is included (enable Pages → Source: GitHub Actions).
 

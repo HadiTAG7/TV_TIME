@@ -1,15 +1,19 @@
+import { useState } from 'react'
 import Icon from './Icon.jsx'
 
 // Poster artwork: a real image when available (TMDB), otherwise a stylized
 // gradient placeholder so the demo catalog still looks like a movie wall.
+// Failed image loads fall back to the placeholder too.
 export default function Poster({ item, className = '', showTitle = true, iconSize = 'text-5xl' }) {
+  const [broken, setBroken] = useState(false)
   const title = item.name || item.title
-  if (item.poster) {
+  if (item.poster && !broken) {
     return (
       <img
         src={item.poster}
         alt={title}
         loading="lazy"
+        onError={() => setBroken(true)}
         className={`w-full h-full object-cover ${className}`}
       />
     )

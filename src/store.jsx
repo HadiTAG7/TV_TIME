@@ -6,12 +6,21 @@ import { makeT, detectLang } from './i18n.js'
 const KEY = 'cinetrack.v1'
 const DAY = 24 * 60 * 60 * 1000
 
+// Default TMDB API key (owner's personal key) so the app works with the real
+// catalog out of the box. Replaceable anytime in Profile → Settings.
+const DEFAULT_TMDB_KEY = 'f94c13fa0f72c474c7761aa22491008d'
+
 /* ───────────────────────── persistence & seeding ───────────────────────── */
 
 function loadState() {
   try {
     const raw = localStorage.getItem(KEY)
-    if (raw) return JSON.parse(raw)
+    if (raw) {
+      const st = JSON.parse(raw)
+      // Installs from before the key was bundled get it filled in.
+      if (!st.settings.tmdbKey) st.settings.tmdbKey = DEFAULT_TMDB_KEY
+      return st
+    }
   } catch { /* corrupted storage falls through to a fresh seed */ }
   return seedState()
 }
@@ -51,7 +60,7 @@ function seedState() {
     }
   }
   return {
-    settings: { lang: detectLang(), tmdbKey: '', name: 'Cinema Fan', tagline: '' },
+    settings: { lang: detectLang(), tmdbKey: DEFAULT_TMDB_KEY, name: 'Cinema Fan', tagline: '' },
     shows,
     movies,
     seededAt: Date.now(),
