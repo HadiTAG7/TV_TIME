@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CineTrack - Upcoming Shows</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#fff6df",
+                    "outline": "#999077",
+                    "tertiary-container": "#d7dae3",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "secondary-fixed": "#e5e2e1",
+                    "on-primary": "#3a3000",
+                    "error": "#ffb4ab",
+                    "surface": "#131313",
+                    "on-primary-fixed": "#221b00",
+                    "on-primary-fixed-variant": "#544600",
+                    "background": "#131313",
+                    "surface-variant": "#353534",
+                    "on-secondary-container": "#b7b5b4",
+                    "tertiary-fixed-dim": "#c3c6cf",
+                    "inverse-primary": "#705d00",
+                    "surface-container-highest": "#353534",
+                    "on-error-container": "#ffdad6",
+                    "on-surface": "#e5e2e1",
+                    "surface-container-high": "#2a2a2a",
+                    "on-tertiary-fixed-variant": "#43474e",
+                    "primary-fixed-dim": "#e9c400",
+                    "tertiary-fixed": "#dfe2eb",
+                    "outline-variant": "#4d4732",
+                    "on-primary-container": "#705e00",
+                    "primary-fixed": "#ffe16d",
+                    "error-container": "#93000a",
+                    "on-background": "#e5e2e1",
+                    "on-tertiary-container": "#5b5f67",
+                    "on-error": "#690005",
+                    "on-secondary-fixed-variant": "#474746",
+                    "surface-tint": "#e9c400",
+                    "inverse-surface": "#e5e2e1",
+                    "surface-bright": "#393939",
+                    "on-secondary-fixed": "#1b1b1c",
+                    "surface-dim": "#131313",
+                    "secondary": "#c8c6c5",
+                    "surface-container-lowest": "#0e0e0e",
+                    "on-surface-variant": "#d0c6ab",
+                    "primary-container": "#ffd700",
+                    "on-tertiary": "#2d3137",
+                    "on-tertiary-fixed": "#181c22",
+                    "surface-container": "#201f1f",
+                    "surface-container-low": "#1c1b1b",
+                    "inverse-on-surface": "#313030",
+                    "tertiary": "#f4f6ff",
+                    "secondary-container": "#474746",
+                    "on-secondary": "#303030"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "24px",
+                    "margin-desktop": "48px",
+                    "sm": "8px",
+                    "md": "16px",
+                    "base": "4px",
+                    "margin-mobile": "16px",
+                    "xl": "40px",
+                    "xs": "4px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-xl": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-md": ["Inter"]
+            },
+            "fontSize": {
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["10px", {"lineHeight": "14px", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0D1117;
+            color: #e5e2e1;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-card {
+            background: rgba(30, 30, 30, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .poster-shadow {
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+        .gradient-overlay {
+            background: linear-gradient(to top, rgba(13, 17, 23, 1) 0%, rgba(13, 17, 23, 0) 100%);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #131313;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #353534;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4d4732;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background min-h-screen pb-24 md:pb-0 md:pl-0">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10 flex justify-between items-center px-margin-mobile h-16 w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="movie_filter">movie_filter</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary dark:text-primary">CineTrack</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:opacity-80 active:scale-95 transition-transform" data-icon="search">search</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-20 px-margin-mobile md:px-margin-desktop max-w-[1440px] mx-auto pb-10">
+<!-- Header Section -->
+<div class="mb-lg">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-2">Upcoming</h2>
+<p class="font-body-md text-on-surface-variant">Don't miss the next episodes of your tracked series.</p>
+</div>
+<!-- Section: Today -->
+<section class="mb-xl">
+<div class="flex items-center justify-between mb-md">
+<h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+                    Today <span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+</h3>
+<span class="font-label-md text-outline">Nov 24</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+<!-- Card 1: Today -->
+<div class="glass-card rounded-xl overflow-hidden flex h-40 group cursor-pointer active:scale-[0.98] transition-transform">
+<div class="w-28 relative flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A moody, high-contrast cinematic television poster for a sci-fi drama set in a neon-drenched futuristic city. The composition features a lone character looking over a rain-slicked balcony, with deep blues and vibrant yellow accents mirroring the CineTrack brand. The aesthetic is clean and professional with a 1px subtle border outline." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBttKbJevqBrn5vDh7Y7zBR9gDMMfsnAZcMy4Yb6JWVAgxkuo5DmDv3a0nW3hkdAJKobHvJMl6E-bYU4ACZ2UrIS7isrd_O8oQEPyIi8K9kHKAGQm8HwsTfRtPhVbzU6b7Tz8exqpdxO0ndrlykY-j1yRFkQVfWTwWbsLoZUsTcQIEWOiRWU8-KX7UtxAcrv2PTPrTVUPAkjqn-gAEVEWvZU4tEYhvBUJt9EtkTtS7srBwQfaTN2gNFz3YNTeNBmBrWOtRzJfUXjOs"/>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-surface-variant">
+<div class="h-full bg-primary-container" style="width: 85%"></div>
+</div>
+</div>
+<div class="p-md flex flex-col justify-center flex-grow">
+<span class="font-label-md text-primary-container mb-1">HBO • 9:00 PM</span>
+<h4 class="font-headline-md text-headline-md text-on-surface truncate">The Last Epoch</h4>
+<p class="font-body-md text-on-surface-variant truncate">S02 E08 • Echoes of Silence</p>
+</div>
+<div class="flex items-center pr-md opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary-container" data-icon="notifications_active">notifications_active</span>
+</div>
+</div>
+<!-- Card 2: Today -->
+<div class="glass-card rounded-xl overflow-hidden flex h-40 group cursor-pointer active:scale-[0.98] transition-transform">
+<div class="w-28 relative flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A dramatic movie poster for a high-stakes crime thriller, showing a shadowy figure in a sleek black suit standing against a dark grey concrete wall. Atmospheric lighting creates deep shadows, while a sliver of warm yellow light highlights the texture of the scene. The overall style is minimalist and premium, aligning with a dark-room theater atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAD-ija66z3uZlA5yTNiFuA23UYgVTPIDUIfJ8Y1kDQbVQom3aer8CjnqE4kcPDsHDKPB417y7WnQTulNPbCKdwGq_QRaU1l6qJi7Ba4dwXrkdQNxPRk9PdZCGy9fTp1pghM3ua3UlsRSH9xqDLZyW6TCui-W1gfgTpn7QwShbEGzgszJOtIAsr8NumnfA3cU05Ocftc2qx8Ds1hSzRNVALYmAFLwMCvpL6pwOocurhRn9pGpxNH0dnH_fU2TPq6FH5Mwiigm4EEKNZ"/>
+</div>
+<div class="p-md flex flex-col justify-center flex-grow">
+<span class="font-label-md text-primary-container mb-1">Netflix • 10:30 PM</span>
+<h4 class="font-headline-md text-headline-md text-on-surface truncate">Bloodline Tactics</h4>
+<p class="font-body-md text-on-surface-variant truncate">S01 E04 • The Vault</p>
+</div>
+<div class="flex items-center pr-md opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Tomorrow -->
+<section class="mb-xl">
+<div class="flex items-center justify-between mb-md">
+<h3 class="font-headline-md text-headline-md text-on-surface">Tomorrow</h3>
+<span class="font-label-md text-outline">Nov 25</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+<!-- Card 3: Tomorrow -->
+<div class="glass-card rounded-xl overflow-hidden flex h-40 group cursor-pointer active:scale-[0.98] transition-transform">
+<div class="w-28 relative flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A vibrant and colorful animated series poster featuring whimsical characters in a lush, enchanted forest. The lighting is soft and magical, with golden bioluminescent plants glowing against a deep purple and black night sky. The image maintains a high-end digital art style with sharp edges and premium color grading." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpbOrXaOFKMtzb48wH9bLSstTBHMMefa_jgGxw1R1-oFpn8dsBLnVLdmq2U5YgG_mefZvkXnQtlhyBLymrMAQDzNeyowOb48LDBFZfR5X0tpsUvqwZP77Y-R_UrQ0qZUwz9RwaG8sOPMRcSDHliHwcmr3NOh5NLTg6fQS8GAeLVXaOak-sIcPYfy7CEdeAwV0YFHayC9Cycv-ZegeD6ld8weXP5dWz_QK4209IXesALU7jZKuCMm6kP6dKJOs43MiHfj51nNmsCk1a"/>
+</div>
+<div class="p-md flex flex-col justify-center flex-grow">
+<span class="font-label-md text-on-surface-variant mb-1">Disney+ • 8:00 AM</span>
+<h4 class="font-headline-md text-headline-md text-on-surface truncate">Ether Realm</h4>
+<p class="font-body-md text-on-surface-variant truncate">S04 E12 • Dawn of the Spirit</p>
+</div>
+<div class="flex items-center pr-md opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: This Week (Asymmetric Layout / Bento) -->
+<section class="mb-xl">
+<div class="flex items-center justify-between mb-md">
+<h3 class="font-headline-md text-headline-md text-on-surface">This Week</h3>
+<span class="font-label-md text-outline">Nov 26 - Dec 01</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-md">
+<!-- Bento Item Large -->
+<div class="md:col-span-2 md:row-span-2 glass-card rounded-xl overflow-hidden relative group cursor-pointer active:scale-[0.99] transition-all min-h-[300px]">
+<div class="absolute inset-0">
+<img class="w-full h-full object-cover" data-alt="A widescreen cinematic capture of a historical epic drama. A vast desert landscape during a sunset, with a silhouette of a lone traveler on horseback. The sky is a gradient of deep orange and dark charcoal. The lighting is dramatic and evocative, capturing a professional film-still quality with high detail and a moody atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA78JG1KXeIwDMSe7xnab7bPnuWGsUKXuZcnKOHgEpXHD5LATmwJHyfplRqjkxbRblz2InBoR6ksC5pyPpS-HzowulwN3DRUWxC7BFoGWxRAyjXbhST_zuMnH0IUXZT8kZzGWgrnmVr1MOd4imzBgMzCJgwOFDStbdEJTnP0IGL-YVrutG2AeH4FJySY6WBDiRT3bpCRjdYVeRkrlh8f3DH23NFflCgivkBDpsYUygQTiHrzHYTlcVLVUWw_NaokMFj4g9leNx7VkXe"/>
+<div class="absolute inset-0 gradient-overlay"></div>
+</div>
+<div class="absolute bottom-0 left-0 right-0 p-lg">
+<span class="inline-block px-3 py-1 bg-primary-container text-on-primary-container rounded-full font-label-md mb-2">Friday, Nov 28</span>
+<h4 class="font-headline-xl text-headline-xl text-on-surface mb-1">Dunes of Time</h4>
+<p class="font-body-lg text-on-surface-variant">S03 E01 • Season Premiere</p>
+</div>
+</div>
+<!-- Bento Item Small 1 -->
+<div class="md:col-span-2 glass-card rounded-xl overflow-hidden flex h-32 group cursor-pointer active:scale-[0.98] transition-transform">
+<div class="w-24 relative flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A minimalist and sleek poster for a medical drama. High-key clinical lighting with clean white surfaces contrasted by deep shadows. A stethoscope sits on a glass table, reflecting a subtle yellow glow from an unseen monitor. The aesthetic is modern, professional, and visually quiet, using a monochromatic base with brand-aligned accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwMUoQYZ6MRo_D_EqZZuesq2icokEG7RPt7nmCIY4x9Bq1Rm9dfSSzLD-eVFCx-5ERI9-FEWiq7AEGnnaZ3zixIUNYL7Wu0uajVCfbKNl5gRL62nAMRTnBqIgICdd2lhemR0WsQGJ4TarcHBnOXe4tm5HX1l2H8-jLLr2Al21ljiKOoH9FFnoWGsGd92VQyRgJ-rujkNet4FEZe6HkVNi_CKFv-R44EdrpB40Xu6_-atXHANHZO1IWKVFbdKO1JvUX8N5Y195uogFg"/>
+</div>
+<div class="p-md flex flex-col justify-center flex-grow">
+<span class="font-label-md text-on-surface-variant mb-1">ABC • Wed, 9 PM</span>
+<h4 class="font-headline-md text-headline-md text-on-surface truncate">Vitals</h4>
+<p class="font-body-md text-on-surface-variant truncate">S05 E19 • Flatline</p>
+</div>
+</div>
+<!-- Bento Item Small 2 -->
+<div class="md:col-span-1 glass-card rounded-xl overflow-hidden relative group cursor-pointer active:scale-[0.98] transition-transform h-48">
+<img class="w-full h-full object-cover" data-alt="An action-packed sports documentary poster featuring a close-up of a racing helmet reflecting a blurred racetrack. The lighting is fast and dynamic, with streaks of light passing across the visor. The color palette emphasizes deep blacks and the primary yellow of the CineTrack system, creating an intense and high-energy feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaC-7Xcy4j4aES5qNYxJJuTarO81tRRPRnf6OBxd1Vf3RowzIPNpw1ivoUV2HqwHqpG7b0XUQ-pVcDAkXL4tgup3524-vejcOPOJBrxw3K10_ij45kqPntLAmCMCpHuwMF2pn8OpqqymiI5845L5bv6fMaxNcgN5AxSW1pGXZEcD2V15XYmeBb8CTO0J1Tezg3iCGx88649xy0G8ggMjrvN52Mp1JZcZoUbSkGQvn_8VoDqnNUGAIzBbeFP3VxdWN_JHjax_fdkbmc"/>
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors"></div>
+<div class="absolute bottom-0 left-0 right-0 p-md">
+<span class="font-label-sm text-primary-container">Thu, 7 PM</span>
+<h4 class="font-label-md text-on-surface truncate">Grid Legend</h4>
+</div>
+</div>
+<!-- Bento Item Small 3 -->
+<div class="md:col-span-1 glass-card rounded-xl overflow-hidden relative group cursor-pointer active:scale-[0.98] transition-transform h-48">
+<img class="w-full h-full object-cover" data-alt="A dark and mysterious psychological thriller poster showing an abstract geometric puzzle piece floating in a void. The surface of the puzzle piece is textured with fine lines that catch a dim, cool white light. The background is a perfect deep black, enhancing the sense of isolation and mystery. The style is ultra-minimalist and sophisticated." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAV45XSesv2hSLuHgR2LE5u1NPd37hkfgPXS1AW1KCjGhMEE9AB3A5DLEXI_5BLnr4sZcwDOLy5aS1ssOJwGAvJpzg1IiOg5OAgGTXxHMPMYnWJVYf56o44-FipWdRlT-ItiId8kIMDYpv3Fzl63D-eY1RdW4a5ctXxrjIEfExy6kqvIcdPmog2YGbIs9IXKWac_t_cTuKUDuoHnRMdrhuaWRdSVY9MhYYiE4uMWuFuyrkhNEVsp09UPl9WR4CJAQLQBZy7AGXHQzKw"/>
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors"></div>
+<div class="absolute bottom-0 left-0 right-0 p-md">
+<span class="font-label-sm text-primary-container">Sat, 11 PM</span>
+<h4 class="font-label-md text-on-surface truncate">Cortex</h4>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar (Mobile only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-t border-white/10 flex justify-around items-center pt-2 pb-safe px-4 h-16">
+<a class="flex flex-col items-center justify-center text-primary font-bold transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<span class="font-label-sm text-label-sm">Upcoming</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="tv">tv</span>
+<span class="font-label-sm text-label-sm">Shows</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="movie">movie</span>
+<span class="font-label-sm text-label-sm">Movies</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+<!-- Desktop Side Nav (Hidden on mobile) -->
+<nav class="hidden md:flex fixed left-0 top-0 h-full w-20 flex-col items-center py-10 bg-surface border-r border-white/5 z-50">
+<div class="mb-10 text-primary">
+<span class="material-symbols-outlined text-4xl" data-icon="movie_filter">movie_filter</span>
+</div>
+<div class="flex flex-col gap-10">
+<a class="text-primary group relative" href="#">
+<span class="material-symbols-outlined text-3xl" data-icon="calendar_today" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<span class="absolute left-full ml-4 px-2 py-1 bg-surface-container text-primary text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity">Upcoming</span>
+</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors group relative" href="#">
+<span class="material-symbols-outlined text-3xl" data-icon="tv">tv</span>
+<span class="absolute left-full ml-4 px-2 py-1 bg-surface-container text-primary text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity">Shows</span>
+</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors group relative" href="#">
+<span class="material-symbols-outlined text-3xl" data-icon="movie">movie</span>
+<span class="absolute left-full ml-4 px-2 py-1 bg-surface-container text-primary text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity">Movies</span>
+</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors group relative" href="#">
+<span class="material-symbols-outlined text-3xl" data-icon="person">person</span>
+<span class="absolute left-full ml-4 px-2 py-1 bg-surface-container text-primary text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity">Profile</span>
+</a>
+</div>
+</nav>
+<script>
+        // Simple intersection observer for reveal animations
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('opacity-0', 'translate-y-4');
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section, .glass-card').forEach(el => {
+            el.classList.add('transition-all', 'duration-700', 'opacity-0', 'translate-y-4');
+            observer.observe(el);
+        });
+
+        // Interactive states for cards
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.classList.add('border-primary/20');
+            });
+            card.addEventListener('mouseleave', () => {
+                card.classList.remove('border-primary/20');
+            });
+        });
+    </script>
+</body></html>

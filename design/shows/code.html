@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CineTrack - Shows Tracking</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#fff6df",
+                    "outline": "#999077",
+                    "tertiary-container": "#d7dae3",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "secondary-fixed": "#e5e2e1",
+                    "on-primary": "#3a3000",
+                    "error": "#ffb4ab",
+                    "surface": "#131313",
+                    "on-primary-fixed": "#221b00",
+                    "on-primary-fixed-variant": "#544600",
+                    "background": "#131313",
+                    "surface-variant": "#353534",
+                    "on-secondary-container": "#b7b5b4",
+                    "tertiary-fixed-dim": "#c3c6cf",
+                    "inverse-primary": "#705d00",
+                    "surface-container-highest": "#353534",
+                    "on-error-container": "#ffdad6",
+                    "on-surface": "#e5e2e1",
+                    "surface-container-high": "#2a2a2a",
+                    "on-tertiary-fixed-variant": "#43474e",
+                    "primary-fixed-dim": "#e9c400",
+                    "tertiary-fixed": "#dfe2eb",
+                    "outline-variant": "#4d4732",
+                    "on-primary-container": "#705e00",
+                    "primary-fixed": "#ffe16d",
+                    "error-container": "#93000a",
+                    "on-background": "#e5e2e1",
+                    "on-tertiary-container": "#5b5f67",
+                    "on-error": "#690005",
+                    "on-secondary-fixed-variant": "#474746",
+                    "surface-tint": "#e9c400",
+                    "inverse-surface": "#e5e2e1",
+                    "surface-bright": "#393939",
+                    "on-secondary-fixed": "#1b1b1c",
+                    "surface-dim": "#131313",
+                    "secondary": "#c8c6c5",
+                    "surface-container-lowest": "#0e0e0e",
+                    "on-surface-variant": "#d0c6ab",
+                    "primary-container": "#ffd700",
+                    "on-tertiary": "#2d3137",
+                    "on-tertiary-fixed": "#181c22",
+                    "surface-container": "#201f1f",
+                    "surface-container-low": "#1c1b1b",
+                    "inverse-on-surface": "#313030",
+                    "tertiary": "#f4f6ff",
+                    "secondary-container": "#474746",
+                    "on-secondary": "#303030"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "24px",
+                    "margin-desktop": "48px",
+                    "sm": "8px",
+                    "md": "16px",
+                    "base": "4px",
+                    "margin-mobile": "16px",
+                    "xl": "40px",
+                    "xs": "4px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-xl": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-md": ["Inter"]
+            },
+            "fontSize": {
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["10px", {"lineHeight": "14px", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0D1117;
+            color: #e5e2e1;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass {
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .poster-card {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .poster-card:hover {
+            transform: scale(1.03) translateY(-4px);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .active-filter {
+            background-color: #ffd700 !important;
+            color: #0D1117 !important;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="pb-24 md:pb-0">
+<!-- Top Navigation -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10 flex justify-between items-center px-margin-mobile h-16 md:px-margin-desktop">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="movie_filter">movie_filter</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">CineTrack</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="active:scale-95 transition-transform hover:opacity-80 p-2 rounded-full">
+<span class="material-symbols-outlined text-on-surface" data-icon="search">search</span>
+</button>
+<div class="hidden md:flex items-center gap-6">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Upcoming</a>
+<a class="font-label-md text-label-md text-primary font-bold transition-colors" href="#">Shows</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Movies</a>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-white/20">
+<img class="w-full h-full object-cover" data-alt="A high-quality studio portrait of a young person with soft cinematic side-lighting, set against a dark, minimalist charcoal background to match the CineTrack dark theme. The subject has a modern aesthetic, with deep shadows and subtle highlights reflecting the premium, sophisticated interface style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyF0uI1T5oDr3kZBD6UeaSF_CqIMzT1_qt-K-UPvMnSNZmr_gMhbCGrcoxLrOMur8XBnRffbSqiYmHIaxxuXITzxNm9ceRoFGlcXroZ98aaPf1N_ON4kbG40W_TwXLmuSFg6KooRSw7zvoEhysK4zHkDcriYmNJ747T135KKnauncz0SOZEwS4wpywcGy1dDKA90DLXNHqgaPmdHwMZb58dkibZzgEvFPlMShox_rbgz2OtcDta-To5p2bE5GmFXUX_zjJI_MBCWiJ"/>
+</div>
+</div>
+</div>
+</header>
+<main class="mt-20 px-margin-mobile md:px-margin-desktop max-w-[1440px] mx-auto">
+<!-- Header & Stats Section -->
+<section class="py-lg flex flex-col md:flex-row md:items-end justify-between gap-md">
+<div>
+<h2 class="font-headline-xl text-headline-xl text-on-surface">Your Library</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Tracking 14 active shows this season</p>
+</div>
+<!-- Filters -->
+<div class="flex gap-sm overflow-x-auto pb-2 hide-scrollbar">
+<button class="active-filter px-md py-sm rounded-full font-label-md text-label-md transition-all duration-200 hover:bg-white/10 bg-surface-container-high text-on-surface" id="filter-watching" onclick="filterShows('watching')">
+                    Watching
+                </button>
+<button class="px-md py-sm rounded-full font-label-md text-label-md transition-all duration-200 hover:bg-white/10 bg-surface-container-high text-on-surface" id="filter-plan" onclick="filterShows('plan')">
+                    Plan to Watch
+                </button>
+<button class="px-md py-sm rounded-full font-label-md text-label-md transition-all duration-200 hover:bg-white/10 bg-surface-container-high text-on-surface" id="filter-completed" onclick="filterShows('completed')">
+                    Completed
+                </button>
+</div>
+</section>
+<!-- Bento/Grid Layout for Shows -->
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-gutter py-md">
+<!-- Show Card 1 -->
+<div class="poster-card relative group aspect-[2/3] rounded-xl overflow-hidden glass">
+<div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10"></div>
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="A dramatic cinematic TV show poster for a high-budget sci-fi series. The visual features a futuristic cityscape with neon accents of yellow and deep blue reflecting on wet pavement. The composition is epic and wide, utilizing deep blacks and high-contrast lighting that fits the CineTrack premium dark-room aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDt0lwi1jvJx0t9KHcOLrkPrUAalvwTHGhB1Bh_XlbTIjNUnRKmzPyMcAu12BDI6dGGl7ZjVLY_Q2cxwIxUpMwBdKNxz-90d0-LIqwfAvIKaPBDzxYeyPEKVRS7dIu-97v_vhBv9suJhBrEbG4DJwUijG3FniKfLLnCxrZciyrvcRMXVYsegM40mYW0G-c5NSO6D7bkBgwVyhwya0VXmmQka2dWOruTV0sgSXbBkBnLwPTNtw9S7R6BJj65H6d_gh2iet863uSb6oFZ"/>
+</div>
+<!-- Content Overlay -->
+<div class="absolute bottom-0 left-0 w-full p-md z-20">
+<h3 class="font-headline-md text-headline-md text-white mb-1 truncate">Neo-Tokyo 2088</h3>
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-sm text-label-sm text-primary-container">S2 • E5/12</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">42% done</span>
+</div>
+<!-- Progress Bar -->
+<div class="h-1 w-full bg-white/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[42%] transition-all duration-500"></div>
+</div>
+</div>
+<!-- Quick Track Button -->
+<button class="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity bg-primary text-on-primary w-10 h-10 rounded-full flex items-center justify-center shadow-lg active:scale-90">
+<span class="material-symbols-outlined" data-icon="add" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+</div>
+<!-- Show Card 2 -->
+<div class="poster-card relative group aspect-[2/3] rounded-xl overflow-hidden glass">
+<div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10"></div>
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="A moody character-driven drama poster for a TV series about high-stakes corporate espionage. The lighting is sophisticated film-noir style with sharp shadows and warm golden highlights against a dark grey background. The visual represents premium storytelling through its minimalist yet powerful composition." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBh9ovqhkTgD5uepWkGWFSsy1eE-ctYnTToWQh_WcM4CuK1zNfORvCF9obp8Acv_80dpbViao3g4vFEklrcjIBHc3wsZCdSwVD_3aU2qApPvQMxHYm0wHAEU6DpEZ-0r6HWs66me29fIH9x2-gIKpLcS_xynVcp-KoQawrS5n06bF8mRd0f1bf9gV4_R1SM8PyGoC0Rvvm83b6DAEVfayvbeJUPaJT08sSmhHE68GB4jEcuIp5dlDqP5FKnfqIg-iVaZk_LcgD0xEDe"/>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-md z-20">
+<h3 class="font-headline-md text-headline-md text-white mb-1 truncate">Shadow Protocol</h3>
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-sm text-label-sm text-primary-container">S1 • E8/10</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">80% done</span>
+</div>
+<div class="h-1 w-full bg-white/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[80%] transition-all duration-500"></div>
+</div>
+</div>
+<button class="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity bg-primary text-on-primary w-10 h-10 rounded-full flex items-center justify-center shadow-lg active:scale-90">
+<span class="material-symbols-outlined" data-icon="check" style="font-variation-settings: 'FILL' 1;">check</span>
+</button>
+</div>
+<!-- Show Card 3 -->
+<div class="poster-card relative group aspect-[2/3] rounded-xl overflow-hidden glass">
+<div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10"></div>
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="A vibrant fantasy TV series poster featuring a lush, magical forest at twilight. The scene glows with bioluminescent flora in shades of soft gold and deep teal. The artistic style is dreamlike and high-definition, perfect for a modern media tracking application's immersive dark mode." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6akq0hK7PefQDKrNVnMqGoB2SUsj9NkABGmY6-_9a63gszI1lFAPMNIEpGnChgXsXKxvkZmaMJiAhMq62XxJLfXhmipkWghQfgx5YcCG-UD3ARQ3tghVqXN8SF7VWsC7begN9b_B0jxVhdDa5EzmAwxAwVcNPQD22-22aNTi_uaJhhb6M5NFM5kESLz1j4oqxo7BqhNqYlX6B-os-ezUdSH7usxg09HQK8KKC2_y4w91L8TndO_1wAMHBlPXilxuQ4SmYX2ILQBqt"/>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-md z-20">
+<h3 class="font-headline-md text-headline-md text-white mb-1 truncate">The Amber Woods</h3>
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-sm text-label-sm text-primary-container">S3 • E1/12</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">8% done</span>
+</div>
+<div class="h-1 w-full bg-white/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[8%] transition-all duration-500"></div>
+</div>
+</div>
+</div>
+<!-- Show Card 4 -->
+<div class="poster-card relative group aspect-[2/3] rounded-xl overflow-hidden glass">
+<div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10"></div>
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="A gritty detective noir TV show poster set in a rain-slicked city alleyway. The palette is dominated by deep blacks and cool greys, with a single warm yellow light source from a streetlamp. The mood is mysterious and atmospheric, consistent with a high-end cinematic tracking interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuADeEIoNpXwUCcudQL7poVP4X-WAuiEUszbLDDSw9XVoQ0JkUmtR1L_QyS39PV3PNxQEsrfX3gVEXnw6g2fGKWWUpbFWbl-3WJmw267QB85Ewqu0Zbct3A1YCZre1B49hX9bkFsNjskxMW09U7_x15dX2EtZy2_VSkIGT9AvpVPw1hV5QUPXsG4an2AgOyGSpfK9_A1ECoAq4-Kgog3BxZrkyVFg1D5oIGaFfT7Mo69ep-KzGbbs2dCFXEmZtHzWa96zXzabLydvWZ7"/>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-md z-20">
+<h3 class="font-headline-md text-headline-md text-white mb-1 truncate">Street Logic</h3>
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-sm text-label-sm text-primary-container">S4 • E10/22</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">45% done</span>
+</div>
+<div class="h-1 w-full bg-white/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[45%] transition-all duration-500"></div>
+</div>
+</div>
+</div>
+<!-- Show Card 5 -->
+<div class="poster-card relative group aspect-[2/3] rounded-xl overflow-hidden glass">
+<div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10"></div>
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="An elegant period drama poster featuring elaborate 19th-century costumes and grand architectural details. The lighting is soft and golden, evocative of a prestigious award-winning series. The composition is clean and focused, reflecting a high-quality streaming service aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRch4POO6MPvrhqoc1h10w9AsTun8h8qblrFHZEvpSXBbNg_wVxZBD0JVK_aGb8rm4rWoObdNLrM3dm6Onix3bnsxFvDaLCYmQEm3KQpeX5hcykFuf3dx-Hrs4qbRRocmM0Euuf4D9DqllKZi9AdR79FoaKlysPDWxAD8_Il4CWntm98mEDlTgkyHZCT5JB0f_RsuFWhFKL1WX6HZACeP6O-B0N7gqjy_EwwNFPx7kwMSQro-FTVkRf4776YEf-f88qwGkck_VL4ln"/>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-md z-20">
+<h3 class="font-headline-md text-headline-md text-white mb-1 truncate">Estate &amp; Honor</h3>
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-sm text-label-sm text-primary-container">S5 • E3/8</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">37% done</span>
+</div>
+<div class="h-1 w-full bg-white/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[37%] transition-all duration-500"></div>
+</div>
+</div>
+</div>
+<!-- More items as part of the grid -->
+<div class="poster-card relative group aspect-[2/3] rounded-xl overflow-hidden glass">
+<div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10"></div>
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="An abstract medical drama poster with high-key lighting and clinical white surfaces contrasted against the deep black background of the UI. The visual elements include subtle medical iconography integrated into a professional, modern design that feels authoritative and premium." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4nayIK9ccH1t3X3uNfqxP4kAYGbHzg3qY52WQDzDceAhxZVTJW6Y_SpxI5yysncQ7nef3Z91jC5EDR-D0CfoUDMrynZ9H1Iy9YqHmeqRvUq7AtFm9u_k_h-LOKAErdoNmurDUCc20zBQFbEGd7C2jqjmqwwoJme82OnhZybJOHuSqdYxe3gtJ2-TtTTA9WeTfHPl8lIHaK3CHuRGAuwKTXp_cvrNf5adhKcbwZCmBi7H9PFZ6t4wggBWRyWZauWiQJsVWmAvDSESi"/>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-md z-20">
+<h3 class="font-headline-md text-headline-md text-white mb-1 truncate">Vital Signs</h3>
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-sm text-label-sm text-primary-container">S1 • E5/13</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">38% done</span>
+</div>
+<div class="h-1 w-full bg-white/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[38%] transition-all duration-500"></div>
+</div>
+</div>
+</div>
+<!-- Continued with more placeholders to fill the bento grid -->
+<div class="poster-card relative group aspect-[2/3] rounded-xl overflow-hidden glass">
+<div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10"></div>
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="A stylized animated TV show poster with bold line art and vibrant, saturated colors. The character design is modern and edgy, set against a dark background to make the primary yellow and white accents pop. This visual provides a dynamic change of pace in the media tracker grid." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBt0qeq8ou3_Qa-n0r_3g6Ewz-LRmyMdvJiDZpcwD9oeB7tOqAo7Y5yzge3bFRbXLHg0-nEIva9Bjdfoym7pYZ3rV_v_nBkxdstfygiN4frYQ017AGvuBvP87aPn5N35hMSEIaoNM6533A2GeqVamRljnKSBL9m00x-5Msp6bRw00Vp9UslLzP996uqUzBLmpB4lEopo-YAPZIDITP672-hC3g4NmERsvDH2iXYGQle3ogOiDBkyP2njWQ1fBSNuwwXrOn1LsTqYNs_"/>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-md z-20">
+<h3 class="font-headline-md text-headline-md text-white mb-1 truncate">Cyber-Pulse</h3>
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-sm text-label-sm text-primary-container">S1 • E2/24</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">8% done</span>
+</div>
+<div class="h-1 w-full bg-white/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[8%] transition-all duration-500"></div>
+</div>
+</div>
+</div>
+<!-- Add New Show Placeholder -->
+<button class="aspect-[2/3] rounded-xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-md hover:bg-white/5 hover:border-primary transition-all duration-300">
+<span class="material-symbols-outlined text-outline text-4xl" data-icon="add_box">add_box</span>
+<span class="font-label-md text-label-md text-outline">Add New Show</span>
+</button>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="md:hidden bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-t border-white/10 fixed bottom-0 left-0 w-full z-50 flex justify-around items-center pt-2 pb-safe px-4 h-16">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-label-sm text-label-sm">Upcoming</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-bold hover:text-primary/80 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="tv" style="font-variation-settings: 'FILL' 1;">tv</span>
+<span class="font-label-sm text-label-sm">Shows</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="movie">movie</span>
+<span class="font-label-sm text-label-sm">Movies</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+<!-- Floating Action Button -->
+<button class="fixed bottom-20 right-6 md:bottom-10 md:right-10 w-14 h-14 bg-primary-container text-on-primary-container rounded-xl shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-transform z-40">
+<span class="material-symbols-outlined text-2xl" data-icon="add">add</span>
+</button>
+<script>
+        function filterShows(type) {
+            // Simple visual state toggle
+            const filters = ['watching', 'plan', 'completed'];
+            filters.forEach(f => {
+                const btn = document.getElementById(`filter-${f}`);
+                if (f === type) {
+                    btn.classList.add('active-filter');
+                } else {
+                    btn.classList.remove('active-filter');
+                }
+            });
+            
+            // Add a small animation to the grid for feedback
+            const grid = document.querySelector('.grid');
+            grid.style.opacity = '0';
+            setTimeout(() => {
+                grid.style.opacity = '1';
+                grid.style.transition = 'opacity 0.4s ease';
+            }, 50);
+        }
+
+        // Add intersection observer for smooth card reveal
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.poster-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+            observer.observe(card);
+        });
+    </script>
+</body></html>
