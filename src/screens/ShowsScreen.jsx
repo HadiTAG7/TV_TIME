@@ -1,49 +1,6 @@
-import { useState } from 'react'
 import Icon from '../components/Icon.jsx'
 import Poster from '../components/Poster.jsx'
 import { useApp, showProgress } from '../store.jsx'
-
-function ShowCard({ show, onOpen }) {
-  const { actions, t } = useApp()
-  const prog = showProgress(show)
-  const canMarkNext = !!prog.nextEp
-
-  return (
-    <div
-      className="poster-card relative group aspect-[2/3] rounded-xl overflow-hidden glass cursor-pointer fade-up"
-      onClick={onOpen}
-    >
-      <div className="absolute inset-0 z-0">
-        <Poster item={show} showTitle={false} className="group-hover:scale-110 transition-transform duration-700" />
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10" />
-      <div className="absolute bottom-0 left-0 w-full p-md z-20">
-        <h3 className="text-headline-md text-white mb-1 truncate" dir="auto">{show.name}</h3>
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-label-sm text-primary-container" dir="ltr">
-            S{prog.currentSeason} • E{prog.seasonWatched}/{prog.seasonTotal}
-          </span>
-          <span className="text-label-sm text-on-surface-variant">{t('percentDone', prog.pct)}</span>
-        </div>
-        <div className="h-1 w-full bg-white/20 rounded-full overflow-hidden">
-          <div className="h-full bg-primary-container transition-all duration-500" style={{ width: `${prog.pct}%` }} />
-        </div>
-      </div>
-      {canMarkNext && (
-        <button
-          className="absolute top-2 end-2 z-20 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity bg-primary-container text-[#0d1117] w-10 h-10 rounded-full flex items-center justify-center shadow-lg active:scale-90"
-          title={`+ S${prog.nextEp.season}E${prog.nextEp.ep.n}`}
-          onClick={(e) => {
-            e.stopPropagation()
-            actions.markNext(show.id)
-          }}
-        >
-          <Icon name="add" filled />
-        </button>
-      )}
-    </div>
-  )
-}
 
 // Library buckets, in display order:
 // watching   — started, and aired episodes remain to watch
@@ -51,6 +8,8 @@ function ShowCard({ show, onOpen }) {
 // upToDate   — caught up with everything aired, waiting for new episodes
 // completed  — finished (manual status)
 // dropped    — stopped watching (manual status)
+export const BUCKET_ORDER = ['watching', 'notStarted', 'upToDate', 'completed', 'dropped']
+
 export function bucketOf(show) {
   if (show.status === 'completed') return 'completed'
   if (show.status === 'dropped') return 'dropped'
@@ -59,63 +18,102 @@ export function bucketOf(show) {
   return nextEp ? 'watching' : 'upToDate'
 }
 
-export default function ShowsScreen({ onOpenDetail, onOpenSearch }) {
-  const { state, t } = useApp()
-  const [filter, setFilter] = useState('watching')
-  const shows = Object.values(state.shows)
-  const activeCount = shows.filter((s) => s.status === 'watching').length
-  const filtered = shows
-    .filter((s) => bucketOf(s) === filter)
-    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+const BUCKET_LABEL_KEYS = {
+  watching: 'watching',
+  notStarted: 'planToWatch',
+  upToDate: 'upToDate',
+  completed: 'completed',
+  dropped: 'dropped',
+}
 
-  const filters = [
-    { id: 'watching', label: t('watching') },
-    { id: 'notStarted', label: t('planToWatch') },
-    { id: 'upToDate', label: t('upToDate') },
-    { id: 'completed', label: t('completed') },
-    { id: 'dropped', label: t('dropped') },
-  ]
+// TV Time-style compact card: clean poster, thin progress bar at the bottom,
+// details on tap. Hover reveals a quick "mark next episode" action.
+function ShowCard({ show, onOpen }) {
+  const { actions } = useApp()
+  const prog = showProgress(show)
+  const started = prog.watchedEps > 0
 
   return (
-    <main className="mt-20 px-margin-mobile md:px-margin-desktop max-w-[1440px] mx-auto">
-      <section className="py-lg flex flex-col md:flex-row md:items-end justify-between gap-md">
-        <div>
-          <h2 className="text-headline-lg md:text-headline-xl text-on-surface">{t('yourLibrary')}</h2>
-          <p className="text-body-lg text-on-surface-variant">{t('trackingActive', activeCount)}</p>
+    <div
+      className="poster-card relative group aspect-[2/3] rounded-lg overflow-hidden bg-surface-container cursor-pointer fade-up"
+      title={show.name}
+      onClick={onOpen}
+    >
+      <Poster item={show} showTitle iconSize="text-3xl" className="group-hover:scale-105 transition-transform duration-500" />
+      {started && (
+        <div className="absolute bottom-0 left-0 w-full h-1.5 bg-black/60 z-10">
+          <div
+            className="h-full bg-primary-container transition-all duration-500"
+            style={{ width: `${prog.pct}%` }}
+          />
         </div>
-        <div className="flex gap-sm overflow-x-auto pb-2 hide-scrollbar">
-          {filters.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setFilter(f.id)}
-              className={`px-md py-sm rounded-full text-label-md whitespace-nowrap transition-all duration-200 ${
-                filter === f.id
-                  ? 'bg-primary-container text-[#0d1117] font-bold'
-                  : 'bg-surface-container-high text-on-surface hover:bg-white/10'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
+      )}
+      {prog.nextEp && (
+        <button
+          className="absolute top-1.5 end-1.5 z-20 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity bg-primary-container text-[#0d1117] w-8 h-8 rounded-full flex items-center justify-center shadow-lg active:scale-90"
+          title={`+ S${prog.nextEp.season}E${prog.nextEp.ep.n}`}
+          onClick={(e) => {
+            e.stopPropagation()
+            actions.markNext(show.id)
+          }}
+        >
+          <Icon name="add" filled className="text-lg" />
+        </button>
+      )}
+    </div>
+  )
+}
+
+export default function ShowsScreen({ onOpenDetail, onOpenSearch }) {
+  const { state, t } = useApp()
+  const shows = Object.values(state.shows)
+  const activeCount = shows.filter((s) => s.status === 'watching').length
+
+  const buckets = Object.fromEntries(BUCKET_ORDER.map((b) => [b, []]))
+  for (const show of shows) buckets[bucketOf(show)].push(show)
+  for (const b of BUCKET_ORDER) buckets[b].sort((a, z) => (z.updatedAt || 0) - (a.updatedAt || 0))
+
+  return (
+    <main className="mt-20 px-margin-mobile md:px-margin-desktop max-w-[1440px] mx-auto pb-16">
+      <section className="py-md text-center">
+        <h2 className="text-headline-lg md:text-headline-xl text-on-surface">{t('yourLibrary')}</h2>
+        <p className="text-body-md text-on-surface-variant">{t('trackingActive', activeCount)}</p>
       </section>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-gutter py-md pb-12">
-        {filtered.map((show) => (
-          <ShowCard key={show.id} show={show} onOpen={() => onOpenDetail({ kind: 'tv', id: show.id })} />
-        ))}
+      {shows.length === 0 && (
+        <p className="text-body-md text-on-surface-variant text-center py-lg">{t('emptyShows')}</p>
+      )}
+
+      {BUCKET_ORDER.map((bucket) =>
+        buckets[bucket].length === 0 ? null : (
+          <section key={bucket} data-bucket={bucket} className="mb-lg">
+            <div className="flex justify-center mb-md mt-sm">
+              <span className="bg-surface-container-highest text-on-surface text-label-md font-bold px-5 py-2 rounded-full">
+                {t(BUCKET_LABEL_KEYS[bucket])}
+              </span>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+              {buckets[bucket].map((show) => (
+                <ShowCard
+                  key={show.id}
+                  show={show}
+                  onOpen={() => onOpenDetail({ kind: 'tv', id: show.id })}
+                />
+              ))}
+            </div>
+          </section>
+        )
+      )}
+
+      <div className="flex justify-center mt-lg">
         <button
           onClick={onOpenSearch}
-          className="aspect-[2/3] rounded-xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-md hover:bg-white/5 hover:border-primary-container transition-all duration-300"
+          className="w-40 aspect-[2/3] rounded-lg border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-md hover:bg-white/5 hover:border-primary-container transition-all duration-300"
         >
           <Icon name="add_box" className="text-outline text-4xl" />
           <span className="text-label-md text-outline">{t('addNewShow')}</span>
         </button>
       </div>
-
-      {filtered.length === 0 && (
-        <p className="text-body-md text-on-surface-variant pb-12 -mt-6">{t('emptyShows')}</p>
-      )}
     </main>
   )
 }
