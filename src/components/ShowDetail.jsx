@@ -12,6 +12,7 @@ function StatusChips({ show }) {
     { id: 'watching', label: t('watching') },
     { id: 'plan', label: t('planToWatch') },
     { id: 'completed', label: t('completed') },
+    { id: 'dropped', label: t('dropped') },
   ]
   return (
     <div className="flex gap-sm flex-wrap">

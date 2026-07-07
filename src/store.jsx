@@ -112,7 +112,7 @@ export function showProgress(show) {
 export function upcomingFor(shows) {
   const out = []
   for (const show of Object.values(shows)) {
-    if (show.status === 'completed') continue
+    if (show.status === 'completed' || show.status === 'dropped') continue
     const { nextAiring } = showProgress(show)
     if (nextAiring) out.push({ show, ...nextAiring })
   }
@@ -246,6 +246,16 @@ export function AppProvider({ children }) {
     return () => clearTimeout(syncRef.current.timer)
   }, [state, doSync])
 
+  // On app open, refresh TMDB metadata for every tracked show (each show is
+  // throttled to once per 12h inside refreshShow; English-title migration
+  // bypasses the throttle once).
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      for (const id of Object.keys(stateRef.current.shows)) actionsRef.current?.refreshShow(id)
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [])
+
   // Pull when the app opens, becomes visible again, and every 5 minutes.
   useEffect(() => {
     if (!state.settings.syncToken) return
@@ -271,12 +281,20 @@ export function AppProvider({ children }) {
   )
   const hasKey = !!auth.key
 
-  const patchShow = useCallback((id, patch) => {
+  // silent: background metadata refreshes don't bump updatedAt, so they never
+  // win sync conflicts against real user edits from another device.
+  const patchShow = useCallback((id, patch, { silent = false } = {}) => {
     setState((st) => {
       const show = st.shows[id]
       if (!show) return st
       const next = typeof patch === 'function' ? patch(show) : patch
-      return { ...st, shows: { ...st.shows, [id]: { ...show, ...next, updatedAt: Date.now() } } }
+      return {
+        ...st,
+        shows: {
+          ...st.shows,
+          [id]: { ...show, ...next, updatedAt: silent ? show.updatedAt : Date.now() },
+        },
+      }
     })
   }, [])
 
@@ -317,7 +335,10 @@ export function AppProvider({ children }) {
         ...st,
         shows: {
           ...st.shows,
-          [full.id]: { ...full, status, watched: {}, rating: 0, addedAt: Date.now(), updatedAt: Date.now() },
+          [full.id]: {
+            ...full, status, watched: {}, rating: 0,
+            dataLang: 'en', addedAt: Date.now(), updatedAt: Date.now(),
+          },
         },
       })
       return full.id
@@ -419,14 +440,22 @@ export function AppProvider({ children }) {
       }))
     },
 
-    // Refresh season/episode data for a TMDB show (new episodes air over time).
+    // Refresh metadata for a TMDB show (new episodes air over time). Also
+    // migrates titles fetched in other languages to English (dataLang).
     async refreshShow(id) {
       const show = state.shows[id]
       if (!show || show.source !== 'tmdb' || !hasKey) return
-      if (show.refreshedAt && Date.now() - show.refreshedAt < 12 * 60 * 60 * 1000) return
+      const fresh = show.refreshedAt && Date.now() - show.refreshedAt < 12 * 60 * 60 * 1000
+      if (fresh && show.dataLang === 'en') return
       try {
         const full = await tmdb.tvDetails(show.tmdbId, auth)
-        patchShow(id, { seasons: full.seasons, showStatus: full.showStatus, vote: full.vote, refreshedAt: Date.now() })
+        patchShow(id, {
+          name: full.name, overview: full.overview, genres: full.genres,
+          poster: full.poster || show.poster, backdrop: full.backdrop || show.backdrop,
+          network: full.network || show.network,
+          seasons: full.seasons, showStatus: full.showStatus, vote: full.vote,
+          refreshedAt: Date.now(), dataLang: 'en',
+        }, { silent: true })
       } catch { /* offline or rate-limited — stale data is fine */ }
     },
 
@@ -467,6 +496,8 @@ export function AppProvider({ children }) {
       setState(seedState())
     },
   }), [auth, hasKey, patchShow, state, doSync])
+  const actionsRef = useRef(actions)
+  actionsRef.current = actions
 
   const value = useMemo(
     () => ({ state, actions, t, hasKey, syncInfo }),

@@ -4,15 +4,17 @@ const BASE = 'https://api.themoviedb.org/3'
 export const IMG = (path, size = 'w342') =>
   path ? `https://image.tmdb.org/t/p/${size}${path}` : ''
 
-function langParam(lang) {
-  return lang === 'ar' ? 'ar-SA' : 'en-US'
+// Catalog data (titles, episode names, overviews) is always fetched in
+// English regardless of the UI language — per the owner's preference.
+function langParam() {
+  return 'en-US'
 }
 
-async function call(path, params, { key, lang }) {
+async function call(path, params, { key }) {
   const url = new URL(BASE + path)
   const isBearer = key.includes('.')
   if (!isBearer) url.searchParams.set('api_key', key)
-  url.searchParams.set('language', langParam(lang))
+  url.searchParams.set('language', langParam())
   for (const [k, v] of Object.entries(params || {})) url.searchParams.set(k, v)
   const res = await fetch(url, {
     headers: isBearer ? { Authorization: `Bearer ${key}` } : {},

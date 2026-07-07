@@ -45,19 +45,35 @@ function ShowCard({ show, onOpen }) {
   )
 }
 
+// Library buckets, in display order:
+// watching   — started, and aired episodes remain to watch
+// notStarted — planned or added with zero episodes watched
+// upToDate   — caught up with everything aired, waiting for new episodes
+// completed  — finished (manual status)
+// dropped    — stopped watching (manual status)
+export function bucketOf(show) {
+  if (show.status === 'completed') return 'completed'
+  if (show.status === 'dropped') return 'dropped'
+  const { watchedEps, nextEp } = showProgress(show)
+  if (show.status === 'plan' || watchedEps === 0) return 'notStarted'
+  return nextEp ? 'watching' : 'upToDate'
+}
+
 export default function ShowsScreen({ onOpenDetail, onOpenSearch }) {
   const { state, t } = useApp()
   const [filter, setFilter] = useState('watching')
   const shows = Object.values(state.shows)
   const activeCount = shows.filter((s) => s.status === 'watching').length
   const filtered = shows
-    .filter((s) => s.status === filter)
+    .filter((s) => bucketOf(s) === filter)
     .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
 
   const filters = [
     { id: 'watching', label: t('watching') },
-    { id: 'plan', label: t('planToWatch') },
+    { id: 'notStarted', label: t('planToWatch') },
+    { id: 'upToDate', label: t('upToDate') },
     { id: 'completed', label: t('completed') },
+    { id: 'dropped', label: t('dropped') },
   ]
 
   return (

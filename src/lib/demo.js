@@ -263,7 +263,7 @@ export const DEMO_SEED = {
     { id: 'd-tv-grid', status: 'watching', watchedThrough: { 1: 2 } },
     { id: 'd-tv-cortex', status: 'watching', watchedThrough: { 1: 5 } },
     { id: 'd-tv-silentharbor', status: 'plan', watchedThrough: {} },
-    { id: 'd-tv-papercrowns', status: 'plan', watchedThrough: {} },
+    { id: 'd-tv-papercrowns', status: 'dropped', watchedThrough: { 1: 3 } },
     { id: 'd-tv-irondynasty', status: 'completed', watchedThrough: { 1: 10 }, rating: 5 },
   ],
   movies: [
