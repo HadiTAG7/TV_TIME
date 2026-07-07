@@ -1,6 +1,8 @@
-import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import { demoShows, demoMovies, DEMO_SEED } from './lib/demo.js'
 import * as tmdb from './lib/tmdb.js'
+import * as cloud from './lib/cloud.js'
+import { mergeStates, serializeForSync } from './lib/sync.js'
 import { makeT, detectLang } from './i18n.js'
 
 const KEY = 'cinetrack.v1'
@@ -19,6 +21,7 @@ function loadState() {
       const st = JSON.parse(raw)
       // Installs from before the key was bundled get it filled in.
       if (!st.settings.tmdbKey) st.settings.tmdbKey = DEFAULT_TMDB_KEY
+      if (!st.deleted) st.deleted = { shows: {}, movies: {} }
       return st
     }
   } catch { /* corrupted storage falls through to a fresh seed */ }
@@ -60,9 +63,13 @@ function seedState() {
     }
   }
   return {
-    settings: { lang: detectLang(), tmdbKey: DEFAULT_TMDB_KEY, name: 'Cinema Fan', tagline: '' },
+    settings: {
+      lang: detectLang(), tmdbKey: DEFAULT_TMDB_KEY, name: 'Cinema Fan', tagline: '',
+      syncToken: '', gistId: '', syncUser: '', settingsUpdatedAt: 0,
+    },
     shows,
     movies,
+    deleted: { shows: {}, movies: {} },
     seededAt: Date.now(),
   }
 }
@@ -188,12 +195,69 @@ const AppCtx = createContext(null)
 
 export function AppProvider({ children }) {
   const [state, setState] = useState(loadState)
+  const [syncInfo, setSyncInfo] = useState({ status: 'idle', at: 0, error: '' })
+  const stateRef = useRef(state)
+  stateRef.current = state
+  const syncRef = useRef({ lastSnap: '', busy: false, timer: 0 })
 
   useEffect(() => {
     try {
       localStorage.setItem(KEY, JSON.stringify(state))
     } catch { /* storage full/unavailable — app keeps working in memory */ }
   }, [state])
+
+  // ── cloud sync: pull remote → merge → push if anything changed ──
+  const doSync = useCallback(async () => {
+    const st = stateRef.current
+    const token = st.settings.syncToken
+    if (!token || syncRef.current.busy) return
+    syncRef.current.busy = true
+    setSyncInfo((s) => ({ ...s, status: 'syncing' }))
+    try {
+      let gistId = st.settings.gistId
+      if (!gistId) gistId = await cloud.findOrCreateGist(token)
+      const remoteRaw = await cloud.pullGist(token, gistId)
+      let remote = null
+      try { remote = remoteRaw ? JSON.parse(remoteRaw) : null } catch { remote = null }
+
+      let merged = remote ? mergeStates(st, remote) : st
+      if (gistId !== st.settings.gistId) {
+        merged = { ...merged, settings: { ...merged.settings, gistId } }
+      }
+      const snap = serializeForSync(merged)
+      if (snap !== serializeForSync(st) || gistId !== st.settings.gistId) setState(merged)
+      const remoteSnap = remote ? serializeForSync({ ...remote, settings: remote.settings || {} }) : ''
+      if (snap !== remoteSnap) await cloud.pushGist(token, gistId, snap)
+      syncRef.current.lastSnap = snap
+      setSyncInfo({ status: 'ok', at: Date.now(), error: '' })
+    } catch (e) {
+      setSyncInfo((s) => ({ ...s, status: 'error', error: String(e.message || e) }))
+    } finally {
+      syncRef.current.busy = false
+    }
+  }, [])
+
+  // Debounced push after any local change.
+  useEffect(() => {
+    if (!state.settings.syncToken) return
+    if (serializeForSync(state) === syncRef.current.lastSnap) return
+    clearTimeout(syncRef.current.timer)
+    syncRef.current.timer = setTimeout(doSync, 4000)
+    return () => clearTimeout(syncRef.current.timer)
+  }, [state, doSync])
+
+  // Pull when the app opens, becomes visible again, and every 5 minutes.
+  useEffect(() => {
+    if (!state.settings.syncToken) return
+    doSync()
+    const onVisible = () => { if (document.visibilityState === 'visible') doSync() }
+    document.addEventListener('visibilitychange', onVisible)
+    const interval = setInterval(doSync, 5 * 60 * 1000)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      clearInterval(interval)
+    }
+  }, [state.settings.syncToken, doSync])
 
   useEffect(() => {
     document.documentElement.lang = state.settings.lang
@@ -218,7 +282,30 @@ export function AppProvider({ children }) {
 
   const actions = useMemo(() => ({
     updateSettings(patch) {
-      setState((st) => ({ ...st, settings: { ...st.settings, ...patch } }))
+      setState((st) => ({
+        ...st,
+        settings: { ...st.settings, ...patch, settingsUpdatedAt: Date.now() },
+      }))
+    },
+
+    // ── cloud sync ──
+    syncNow: doSync,
+
+    async connectSync(token) {
+      const login = await cloud.validateToken(token.trim())
+      setState((st) => ({
+        ...st,
+        settings: { ...st.settings, syncToken: token.trim(), syncUser: login, gistId: '' },
+      }))
+      return login
+    },
+
+    disconnectSync() {
+      setState((st) => ({
+        ...st,
+        settings: { ...st.settings, syncToken: '', gistId: '', syncUser: '' },
+      }))
+      setSyncInfo({ status: 'idle', at: 0, error: '' })
     },
 
     // `item` is a catalog entry (demo or TMDB summary). TMDB shows get full
@@ -245,7 +332,8 @@ export function AppProvider({ children }) {
           ...st.movies,
           [full.id]: {
             ...full, status, rating: 0,
-            watchedAt: status === 'watched' ? Date.now() : 0, addedAt: Date.now(),
+            watchedAt: status === 'watched' ? Date.now() : 0,
+            addedAt: Date.now(), updatedAt: Date.now(),
           },
         },
       })
@@ -256,7 +344,9 @@ export function AppProvider({ children }) {
       setState((st) => {
         const shows = { ...st.shows }
         delete shows[id]
-        return { ...st, shows }
+        // tombstone so the removal reaches other synced devices
+        const deleted = { ...st.deleted, shows: { ...st.deleted?.shows, [id]: Date.now() } }
+        return { ...st, shows, deleted }
       })
     },
 
@@ -264,7 +354,8 @@ export function AppProvider({ children }) {
       setState((st) => {
         const movies = { ...st.movies }
         delete movies[id]
-        return { ...st, movies }
+        const deleted = { ...st.deleted, movies: { ...st.deleted?.movies, [id]: Date.now() } }
+        return { ...st, movies, deleted }
       })
     },
 
@@ -311,14 +402,21 @@ export function AppProvider({ children }) {
           ...st,
           movies: {
             ...st.movies,
-            [id]: { ...m, status, watchedAt: status === 'watched' ? (m.watchedAt || Date.now()) : 0 },
+            [id]: {
+              ...m, status,
+              watchedAt: status === 'watched' ? (m.watchedAt || Date.now()) : 0,
+              updatedAt: Date.now(),
+            },
           },
         }
       })
     },
 
     rateMovie(id, rating) {
-      setState((st) => ({ ...st, movies: { ...st.movies, [id]: { ...st.movies[id], rating } } }))
+      setState((st) => ({
+        ...st,
+        movies: { ...st.movies, [id]: { ...st.movies[id], rating, updatedAt: Date.now() } },
+      }))
     },
 
     // Refresh season/episode data for a TMDB show (new episodes air over time).
@@ -368,9 +466,12 @@ export function AppProvider({ children }) {
       localStorage.removeItem(KEY)
       setState(seedState())
     },
-  }), [auth, hasKey, patchShow, state])
+  }), [auth, hasKey, patchShow, state, doSync])
 
-  const value = useMemo(() => ({ state, actions, t, hasKey }), [state, actions, t, hasKey])
+  const value = useMemo(
+    () => ({ state, actions, t, hasKey, syncInfo }),
+    [state, actions, t, hasKey, syncInfo]
+  )
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>
 }
 

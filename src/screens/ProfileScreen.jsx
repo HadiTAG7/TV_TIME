@@ -46,6 +46,101 @@ function QuickRow({ icon, label, onClick, danger = false }) {
   )
 }
 
+function CloudSyncSection() {
+  const { state, actions, t, syncInfo } = useApp()
+  const [token, setToken] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const connected = !!state.settings.syncToken
+  const lang = state.settings.lang
+
+  async function connect() {
+    if (!token.trim()) return
+    setBusy(true)
+    setError('')
+    try {
+      await actions.connectSync(token)
+      setToken('')
+      actions.syncNow()
+    } catch {
+      setError(t('badSyncKey'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const lastSyncText = syncInfo.at
+    ? t('lastSync', new Intl.DateTimeFormat(lang === 'ar' ? 'ar' : 'en-US', { hour: 'numeric', minute: '2-digit' }).format(syncInfo.at))
+    : t('syncNever')
+
+  return (
+    <div className="rounded-xl border border-white/10 p-md flex flex-col gap-3 bg-surface-container-low">
+      <div className="flex items-center gap-2">
+        <Icon name="cloud_sync" className="text-primary-container" />
+        <h3 className="text-headline-md text-on-surface">{t('cloudSync')}</h3>
+      </div>
+
+      {!connected ? (
+        <>
+          <p className="text-label-sm text-on-surface-variant leading-relaxed">{t('cloudSyncHint')}</p>
+          <a
+            href="https://github.com/settings/tokens/new?scopes=gist&description=CineTrack%20Sync"
+            target="_blank"
+            rel="noreferrer"
+            className="text-label-md text-primary-container hover:underline"
+          >
+            {t('createSyncKey')}
+          </a>
+          <div className="flex gap-sm">
+            <input
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              placeholder={t('syncKeyPlaceholder')}
+              dir="ltr"
+              className="flex-1 min-w-0 bg-[#121212] border border-white/10 focus:border-primary-container outline-none rounded-lg px-3 py-2.5 text-body-md text-on-surface transition-colors"
+            />
+            <button
+              onClick={connect}
+              disabled={busy || !token.trim()}
+              className="px-md py-sm rounded-lg text-label-md bg-primary-container text-[#0d1117] font-bold disabled:opacity-40 active:scale-95 transition-all flex-none"
+            >
+              {busy ? t('connecting') : t('connect')}
+            </button>
+          </div>
+          {error && <p className="text-label-sm text-error">{error}</p>}
+        </>
+      ) : (
+        <>
+          <p className="text-body-md text-on-surface flex items-center gap-2">
+            <Icon name="check_circle" filled className="text-primary-container text-base" />
+            {t('connectedAs', state.settings.syncUser || 'GitHub')}
+          </p>
+          <p className="text-label-sm text-on-surface-variant">
+            {syncInfo.status === 'syncing' ? t('syncing')
+              : syncInfo.status === 'error' ? t('syncFailed')
+              : lastSyncText}
+          </p>
+          <div className="flex gap-sm">
+            <button
+              onClick={() => actions.syncNow()}
+              disabled={syncInfo.status === 'syncing'}
+              className="px-md py-sm rounded-lg text-label-md bg-primary-container text-[#0d1117] font-bold disabled:opacity-40 active:scale-95 transition-all flex items-center gap-1"
+            >
+              <Icon name="sync" className="text-base" /> {t('syncNow')}
+            </button>
+            <button
+              onClick={() => actions.disconnectSync()}
+              className="px-md py-sm rounded-lg text-label-md text-error border border-error/30 hover:bg-error/10 transition-colors"
+            >
+              {t('disconnectSync')}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 function SettingsSheet({ open, onClose }) {
   const { state, actions, t } = useApp()
   const fileRef = useRef(null)
@@ -55,6 +150,8 @@ function SettingsSheet({ open, onClose }) {
     <Sheet open={open} onClose={onClose}>
       <div className="p-md pt-12 flex flex-col gap-lg pb-8">
         <h2 className="text-headline-lg-mobile text-on-surface">{t('settings')}</h2>
+
+        <CloudSyncSection />
 
         <div>
           <label className="text-label-md text-on-surface-variant uppercase tracking-wider">{t('language')}</label>

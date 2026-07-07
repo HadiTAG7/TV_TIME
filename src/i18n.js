@@ -111,6 +111,21 @@ const STRINGS = {
     days: (n) => `${n}d`,
     hours: (n) => `${n}h`,
     installHint: 'Tip: use "Add to Home Screen" in your browser to install CineTrack as an app.',
+
+    cloudSync: 'Cloud Sync',
+    cloudSyncHint: 'Sync your library across all your devices through a private backup on your GitHub account. Create a sync key once, then paste the same key on every device.',
+    createSyncKey: 'Create a sync key on GitHub →',
+    syncKeyPlaceholder: 'Paste your sync key (ghp_…)',
+    connect: 'Connect',
+    connecting: 'Connecting…',
+    connectedAs: (u) => `Connected as @${u}`,
+    syncNow: 'Sync Now',
+    syncing: 'Syncing…',
+    disconnectSync: 'Disconnect',
+    lastSync: (time) => `Last sync: ${time}`,
+    syncNever: 'Not synced yet',
+    syncFailed: 'Sync failed — check your key and connection.',
+    badSyncKey: 'Invalid key. Make sure it has the "gist" permission.',
   },
 
   ar: {
@@ -224,6 +239,21 @@ const STRINGS = {
     days: (n) => `${n} يوم`,
     hours: (n) => `${n} ساعة`,
     installHint: 'نصيحة: استخدم «إضافة إلى الشاشة الرئيسية» في متصفحك لتثبيت التطبيق.',
+
+    cloudSync: 'المزامنة السحابية',
+    cloudSyncHint: 'زامِن مكتبتك بين جميع أجهزتك عبر نسخة خاصة محفوظة في حسابك على GitHub. أنشئ مفتاح المزامنة مرة واحدة، ثم الصق نفس المفتاح في كل جهاز.',
+    createSyncKey: 'أنشئ مفتاح المزامنة من GitHub ←',
+    syncKeyPlaceholder: 'الصق مفتاح المزامنة (…ghp_)',
+    connect: 'اتصال',
+    connecting: 'جارٍ الاتصال…',
+    connectedAs: (u) => `متصل بحساب @${u}`,
+    syncNow: 'زامِن الآن',
+    syncing: 'جارٍ المزامنة…',
+    disconnectSync: 'فصل المزامنة',
+    lastSync: (time) => `آخر مزامنة: ${time}`,
+    syncNever: 'لم تتم مزامنة بعد',
+    syncFailed: 'فشلت المزامنة — تحقق من المفتاح والاتصال.',
+    badSyncKey: 'المفتاح غير صالح. تأكد أنه يملك صلاحية "gist".',
   },
 }
 

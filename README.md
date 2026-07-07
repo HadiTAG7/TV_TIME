@@ -20,6 +20,7 @@
 ومزايا **إضافية** ليست في TV Time:
 
 - 🔒 **خصوصية كاملة**: كل بياناتك على جهازك فقط (localStorage) — لا حساب ولا خوادم.
+- ☁️ **مزامنة سحابية اختيارية**: زامِن مكتبتك بين جميع أجهزتك عبر نسخة خاصة في حسابك على GitHub (Gist خاص). من **حسابي ← الإعدادات ← المزامنة السحابية**: أنشئ مفتاح مزامنة بصلاحية `gist` فقط من الرابط داخل التطبيق، والصق نفس المفتاح في كل جهاز. الدمج ذكي: الحلقات المُشاهدة تُجمع من كل الأجهزة، والأحدث يفوز عند التعارض، والحذف ينتقل بين الأجهزة.
 - 💾 **تصدير واستيراد نسخة احتياطية** بصيغة JSON (الشيء الذي حُرم منه مستخدمو TV Time عند إغلاقه!).
 - 🌐 **عربي + إنجليزي** مع دعم كامل للاتجاه RTL.
 - 📱 **PWA**: ثبّته على هاتفك كتطبيق حقيقي ويعمل دون اتصال (الخطوط والأيقونات مضمّنة محلياً).
@@ -82,7 +83,7 @@ Built to the bundled "Cinematic Core" design system (dark cinema theme, golden a
 
 **Everything TV Time had**: episode-by-episode tracking with progress bars, movie watchlist & ratings, an upcoming-episodes calendar (Today / Tomorrow / This Week / Later), trending & genre discovery, watch stats and unlockable achievements.
 
-**Plus what it never gave you**: full privacy (all data in localStorage), one-tap **JSON backup export/import**, Arabic + English with full RTL, and an installable offline-capable **PWA** with self-hosted fonts & icons.
+**Plus what it never gave you**: full privacy (all data in localStorage), optional **cloud sync across devices** via a private GitHub Gist (create a gist-scoped token from the in-app link, paste the same key on every device — watched episodes union, newest-wins conflicts, deletions propagate), one-tap **JSON backup export/import**, Arabic + English with full RTL, and an installable offline-capable **PWA** with self-hosted fonts & icons.
 
 **Real data**: the app ships preconfigured with a TMDB API key, so searching the real catalog works out of the box — seasons, episodes and air dates are fetched automatically, localized to Arabic when the UI language is Arabic. You can swap in your own free key from [themoviedb.org](https://www.themoviedb.org/) in **Profile → Settings → TMDB API Key** (v3 key or v4 read token); with no key at all the app falls back to its built-in demo catalog.
 
