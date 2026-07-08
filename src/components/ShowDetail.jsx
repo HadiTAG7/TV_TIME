@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import Icon from './Icon.jsx'
 import Poster from './Poster.jsx'
 import RatingStars from './RatingStars.jsx'
@@ -33,7 +34,20 @@ function StatusChips({ show }) {
   )
 }
 
-function SeasonBlock({ show, season }) {
+// Unwatched episodes anywhere in the show before (s, e).
+function countPrevUnwatched(show, s, e) {
+  let count = 0
+  for (const season of show.seasons) {
+    if (season.n > s) continue
+    for (const ep of season.episodes) {
+      if (season.n === s && ep.n >= e) continue
+      if (!show.watched[`${season.n}:${ep.n}`]) count++
+    }
+  }
+  return count
+}
+
+function SeasonBlock({ show, season, onCheckEpisode }) {
   const { state, actions, t } = useApp()
   const lang = state.settings.lang
   const [open, setOpen] = useState(false)
@@ -87,7 +101,12 @@ function SeasonBlock({ show, season }) {
                     type="checkbox"
                     className="ep-check"
                     checked={done}
-                    onChange={() => actions.toggleEpisode(show.id, season.n, ep.n)}
+                    onChange={() => {
+                      // Unchecking is always direct; checking may ask about
+                      // earlier unwatched episodes first.
+                      if (done) actions.toggleEpisode(show.id, season.n, ep.n)
+                      else onCheckEpisode(season.n, ep.n)
+                    }}
                     aria-label={`S${season.n}E${ep.n}`}
                   />
                   <span className="text-label-md text-on-surface-variant w-8 flex-none" dir="ltr">
@@ -109,9 +128,16 @@ function SeasonBlock({ show, season }) {
 
 export default function ShowDetail({ id, onClose }) {
   const { state, actions, t } = useApp()
+  const [pendingEp, setPendingEp] = useState(null) // { s, e, count }
   const show = state.shows[id]
   if (!show) return null
   const prog = showProgress(show)
+
+  function onCheckEpisode(s, e) {
+    const count = countPrevUnwatched(show, s, e)
+    if (count > 0) setPendingEp({ s, e, count })
+    else actions.toggleEpisode(show.id, s, e)
+  }
 
   return (
     <Sheet open onClose={onClose}>
@@ -168,7 +194,7 @@ export default function ShowDetail({ id, onClose }) {
           <h3 className="text-headline-md text-on-surface mb-2">{t('seasons')}</h3>
           <div className="flex flex-col gap-2">
             {show.seasons.map((s) => (
-              <SeasonBlock key={s.n} show={show} season={s} />
+              <SeasonBlock key={s.n} show={show} season={s} onCheckEpisode={onCheckEpisode} />
             ))}
           </div>
         </div>
@@ -185,6 +211,52 @@ export default function ShowDetail({ id, onClose }) {
           <Icon name="delete" className="text-base" /> {t('removeFromLibrary')}
         </button>
       </div>
+
+      {/* "Mark previous episodes too?" dialog — portaled to <body> because
+          the sheet's transform would trap position:fixed inside it */}
+      {pendingEp && createPortal(
+        <div
+          className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm overlay-in flex items-center justify-center p-6"
+          onClick={() => setPendingEp(null)}
+        >
+          <div
+            className="glass rounded-xl p-lg max-w-[24rem] w-full sheet-in flex flex-col gap-md"
+            role="dialog"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2">
+              <Icon name="check_circle" className="text-primary-container" />
+              <span className="text-label-md text-on-surface-variant" dir="ltr">
+                S{pendingEp.s} • E{pendingEp.e}
+              </span>
+            </div>
+            <p className="text-body-lg text-on-surface leading-relaxed">
+              {t('markPrevQ', pendingEp.count)}
+            </p>
+            <div className="flex flex-col gap-sm">
+              <button
+                className="w-full py-3 rounded-lg bg-primary-container text-[#0d1117] text-label-md font-bold active:scale-95 transition-transform"
+                onClick={() => {
+                  actions.markThrough(show.id, pendingEp.s, pendingEp.e)
+                  setPendingEp(null)
+                }}
+              >
+                {t('yesMarkPrev')}
+              </button>
+              <button
+                className="w-full py-3 rounded-lg bg-surface-container-high text-on-surface text-label-md font-bold hover:bg-white/10 active:scale-95 transition-all"
+                onClick={() => {
+                  actions.toggleEpisode(show.id, pendingEp.s, pendingEp.e)
+                  setPendingEp(null)
+                }}
+              >
+                {t('noJustThis')}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </Sheet>
   )
 }

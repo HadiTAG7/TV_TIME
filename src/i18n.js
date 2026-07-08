@@ -74,6 +74,12 @@ const STRINGS = {
     add: 'Add',
     inLibrary: 'In Library',
 
+    markPrevQ: (n) => n === 1
+      ? 'You have 1 earlier unwatched episode — mark it as watched too?'
+      : `You have ${n} earlier unwatched episodes — mark them all as watched?`,
+    yesMarkPrev: 'Yes, mark previous',
+    noJustThis: 'No, just this one',
+
     seasons: 'Seasons',
     season: (n) => `Season ${n}`,
     specials: 'Specials',
@@ -203,6 +209,12 @@ const STRINGS = {
     movieBadge: 'فيلم',
     add: 'إضافة',
     inLibrary: 'في المكتبة',
+
+    markPrevQ: (n) => n === 1
+      ? 'لديك حلقة سابقة واحدة غير معلّمة — هل تعتبرها مُشاهدة أيضاً؟'
+      : `لديك ${n} حلقات سابقة غير معلّمة — هل تعتبرها مُشاهدة كلها؟`,
+    yesMarkPrev: 'نعم، علّم السابقة',
+    noJustThis: 'لا، هذه الحلقة فقط',
 
     seasons: 'المواسم',
     season: (n) => `الموسم ${n}`,

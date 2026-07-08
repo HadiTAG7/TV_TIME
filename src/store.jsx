@@ -406,6 +406,23 @@ export function AppProvider({ children }) {
       })
     },
 
+    // Mark every episode from the start of the show up to and including
+    // (s, e) — all previous seasons too. Existing timestamps are kept.
+    markThrough(id, s, e) {
+      patchShow(id, (show) => {
+        const watched = { ...show.watched }
+        for (const season of show.seasons) {
+          if (season.n > s) continue
+          for (const ep of season.episodes) {
+            if (season.n === s && ep.n > e) continue
+            const k = `${season.n}:${ep.n}`
+            watched[k] = watched[k] || Date.now()
+          }
+        }
+        return { watched }
+      })
+    },
+
     // Mark the next aired-but-unwatched episode (poster quick action).
     markNext(id) {
       patchShow(id, (show) => {
