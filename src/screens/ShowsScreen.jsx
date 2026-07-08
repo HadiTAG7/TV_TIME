@@ -14,8 +14,12 @@ export function bucketOf(show) {
   if (show.status === 'completed') return 'completed'
   if (show.status === 'dropped') return 'dropped'
   const { watchedEps, nextEp } = showProgress(show)
-  if (show.status === 'plan' || watchedEps === 0) return 'notStarted'
-  return nextEp ? 'watching' : 'upToDate'
+  if (watchedEps === 0) return 'notStarted'
+  if (nextEp) return 'watching'
+  // Caught up on everything aired — auto-complete if the show itself has
+  // truly ended, otherwise it's just waiting on new episodes.
+  const ended = show.showStatus === 'Ended' || show.showStatus === 'Canceled'
+  return ended ? 'completed' : 'upToDate'
 }
 
 const BUCKET_LABEL_KEYS = {
@@ -78,7 +82,7 @@ function ShowCard({ show, onOpen }) {
 export default function ShowsScreen({ onOpenDetail, onOpenSearch }) {
   const { state, t } = useApp()
   const shows = Object.values(state.shows)
-  const activeCount = shows.filter((s) => s.status === 'watching').length
+  const activeCount = shows.filter((s) => bucketOf(s) === 'watching').length
 
   const buckets = Object.fromEntries(BUCKET_ORDER.map((b) => [b, []]))
   for (const show of shows) buckets[bucketOf(show)].push(show)

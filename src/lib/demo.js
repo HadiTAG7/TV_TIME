@@ -160,7 +160,7 @@ export function demoShows() {
       id: 'd-tv-silentharbor', type: 'tv', name: 'Silent Harbor', year: 2024,
       genres: ['Drama', 'Mystery'], vote: 7.5, network: 'Showtime', airTime: '9:00 PM',
       overview: 'A lighthouse town where the fog keeps more secrets than the sea.',
-      grad: ['#2c3e50', '#4ca1af'], icon: 'foggy', episodeRunTime: 49,
+      grad: ['#2c3e50', '#4ca1af'], icon: 'foggy', episodeRunTime: 49, showStatus: 'Ended',
       seasons: [season(1, 8, { firstAt: -120, runtime: 49 })],
     },
     {
@@ -174,7 +174,7 @@ export function demoShows() {
       id: 'd-tv-irondynasty', type: 'tv', name: 'Iron Dynasty', year: 2024,
       genres: ['Drama', 'History'], vote: 9.0, network: 'FX', airTime: '10:00 PM',
       overview: 'A shogunate epic of steel, silk and succession.',
-      grad: ['#1d1d1d', '#8e0e00'], icon: 'fort', episodeRunTime: 60,
+      grad: ['#1d1d1d', '#8e0e00'], icon: 'fort', episodeRunTime: 60, showStatus: 'Ended',
       seasons: [season(1, 10, { firstAt: -300, runtime: 60 })],
     },
   ]
@@ -262,9 +262,9 @@ export const DEMO_SEED = {
     { id: 'd-tv-dunes', status: 'watching', watchedThrough: { 1: 9, 2: 9 } },
     { id: 'd-tv-grid', status: 'watching', watchedThrough: { 1: 2 } },
     { id: 'd-tv-cortex', status: 'watching', watchedThrough: { 1: 5 } },
-    { id: 'd-tv-silentharbor', status: 'plan', watchedThrough: {} },
+    { id: 'd-tv-silentharbor', status: 'watching', watchedThrough: {} },
     { id: 'd-tv-papercrowns', status: 'dropped', watchedThrough: { 1: 3 } },
-    { id: 'd-tv-irondynasty', status: 'completed', watchedThrough: { 1: 10 }, rating: 5 },
+    { id: 'd-tv-irondynasty', status: 'watching', watchedThrough: { 1: 10 }, rating: 5 },
   ],
   movies: [
     { id: 'd-mv-royal', status: 'watchlist' },

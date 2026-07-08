@@ -12,10 +12,15 @@ function StatusChips({ show }) {
   const { actions, t } = useApp()
   const options = [
     { id: 'watching', label: t('watching') },
-    { id: 'plan', label: t('planToWatch') },
     { id: 'completed', label: t('completed') },
     { id: 'dropped', label: t('dropped') },
   ]
+  // Highlight the chip that matches the *actual* bucket (which may be
+  // auto-derived, e.g. a caught-up show whose real airing status is
+  // "Ended") rather than the raw stored status — so it never contradicts
+  // what the show grid is showing.
+  const bucket = bucketOf(show)
+  const activeId = bucket === 'dropped' ? 'dropped' : bucket === 'completed' ? 'completed' : 'watching'
   return (
     <div className="flex gap-sm flex-wrap">
       {options.map((o) => (
@@ -23,7 +28,7 @@ function StatusChips({ show }) {
           key={o.id}
           onClick={() => actions.setShowStatus(show.id, o.id)}
           className={`px-md py-sm rounded-full text-label-md transition-all duration-200 ${
-            show.status === o.id
+            activeId === o.id
               ? 'bg-primary-container text-[#0d1117] font-bold'
               : 'bg-surface-container-high text-on-surface hover:bg-white/10'
           }`}
@@ -182,7 +187,7 @@ export default function ShowDetail({ id, onClose }) {
 
         <StatusChips show={show} />
 
-        {show.status !== 'completed' && (
+        {bucketOf(show) !== 'completed' && (
           <button
             className="self-start text-label-md text-primary-container flex items-center gap-1 hover:underline"
             onClick={() => {

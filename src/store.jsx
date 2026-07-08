@@ -424,9 +424,13 @@ export function AppProvider({ children }) {
     },
 
     // "I already watched this whole show" — marks every already-aired
-    // episode across every season and sets status to completed in one go.
-    // Unaired episodes are left alone so the Upcoming calendar and stats
-    // stay honest; existing timestamps are kept.
+    // episode across every season. Does NOT force a 'completed' status:
+    // bucketOf() derives the real bucket from progress + the show's actual
+    // airing status, so a still-running show correctly lands in "Up to
+    // Date" rather than being falsely called finished. Clears any prior
+    // dropped/completed override so auto-tracking resumes. Unaired
+    // episodes are left alone so Upcoming and stats stay honest; existing
+    // timestamps are kept.
     markAllWatched(id) {
       patchShow(id, (show) => {
         const today = new Date().toISOString().slice(0, 10)
@@ -438,7 +442,7 @@ export function AppProvider({ children }) {
             watched[k] = watched[k] || Date.now()
           }
         }
-        return { watched, status: 'completed' }
+        return { watched, status: 'watching' }
       })
     },
 
