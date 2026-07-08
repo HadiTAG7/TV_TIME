@@ -18,7 +18,7 @@ function Row({ entry, onOpen }) {
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-label-md text-primary-container mb-0.5">
-          {[show.network, show.airTime].filter(Boolean).join(' • ') || fmtWeekday(ep.air, state.settings.lang)}
+          {[fmtDate(ep.air, state.settings.lang), show.network, show.airTime].filter(Boolean).join(' • ')}
         </p>
         <h3 className="text-headline-md text-on-surface truncate" dir="auto">{show.name}</h3>
         <p className="text-body-md text-on-surface-variant truncate" dir="auto">
@@ -84,12 +84,15 @@ export default function UpcomingScreen({ onOpenDetail }) {
   const weekRange = groups.week.length
     ? `${fmtDate(groups.week[0].ep.air, lang)} - ${fmtDate(groups.week[groups.week.length - 1].ep.air, lang)}`
     : ''
+  const laterRange = groups.later.length
+    ? `${fmtDate(groups.later[0].ep.air, lang)} - ${fmtDate(groups.later[groups.later.length - 1].ep.air, lang)}`
+    : ''
 
   const sections = [
     { key: 'today', title: t('today'), dot: true, side: fmtDate(new Date().toISOString().slice(0, 10), lang), items: groups.today },
     { key: 'tomorrow', title: t('tomorrow'), side: fmtDate(new Date(Date.now() + 864e5).toISOString().slice(0, 10), lang), items: groups.tomorrow },
     { key: 'week', title: t('thisWeek'), side: weekRange, items: groups.week, featured: true },
-    { key: 'later', title: t('later'), side: '', items: groups.later },
+    { key: 'later', title: t('later'), side: laterRange, items: groups.later },
   ]
 
   return (
