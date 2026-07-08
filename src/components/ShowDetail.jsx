@@ -5,6 +5,7 @@ import Poster from './Poster.jsx'
 import RatingStars from './RatingStars.jsx'
 import Sheet from './Sheet.jsx'
 import { useApp, showProgress } from '../store.jsx'
+import { bucketOf, BUCKET_BAR_COLOR } from '../screens/ShowsScreen.jsx'
 import { fmtDate } from '../lib/format.js'
 
 function StatusChips({ show }) {
@@ -165,7 +166,10 @@ export default function ShowDetail({ id, onClose }) {
             <span className="text-label-md text-on-surface-variant">{t('percentDone', prog.pct)}</span>
           </div>
           <div className="h-1.5 w-full bg-white/15 rounded-full overflow-hidden">
-            <div className="h-full bg-primary-container transition-all duration-500" style={{ width: `${prog.pct}%` }} />
+            <div
+              className="h-full transition-all duration-500"
+              style={{ width: `${prog.pct}%`, backgroundColor: BUCKET_BAR_COLOR[bucketOf(show)] || '#ffd700' }}
+            />
           </div>
           {prog.nextAiring && (
             <p className="text-body-md text-on-surface-variant mt-2">

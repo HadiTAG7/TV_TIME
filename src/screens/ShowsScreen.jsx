@@ -26,12 +26,23 @@ const BUCKET_LABEL_KEYS = {
   dropped: 'dropped',
 }
 
+// Progress-bar color per status: yellow = still airing/watchable,
+// green = caught up & waiting for new episodes, purple = finished,
+// gray = dropped.
+export const BUCKET_BAR_COLOR = {
+  watching: '#ffd700',
+  upToDate: '#34d399',
+  completed: '#b58cff',
+  dropped: '#8a8a8a',
+}
+
 // TV Time-style compact card: clean poster, thin progress bar at the bottom,
 // details on tap. Hover reveals a quick "mark next episode" action.
 function ShowCard({ show, onOpen }) {
   const { actions } = useApp()
   const prog = showProgress(show)
   const started = prog.watchedEps > 0
+  const barColor = BUCKET_BAR_COLOR[bucketOf(show)] || '#ffd700'
 
   return (
     <div
@@ -43,8 +54,8 @@ function ShowCard({ show, onOpen }) {
       {started && (
         <div className="absolute bottom-0 left-0 w-full h-1.5 bg-black/60 z-10">
           <div
-            className="h-full bg-primary-container transition-all duration-500"
-            style={{ width: `${prog.pct}%` }}
+            className="h-full transition-all duration-500"
+            style={{ width: `${prog.pct}%`, backgroundColor: barColor }}
           />
         </div>
       )}
