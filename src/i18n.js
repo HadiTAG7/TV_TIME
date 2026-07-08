@@ -79,6 +79,8 @@ const STRINGS = {
       : `You have ${n} earlier unwatched episodes — mark them all as watched?`,
     yesMarkPrev: 'Yes, mark previous',
     noJustThis: 'No, just this one',
+    markAllWatched: "I've already watched this show",
+    markAllWatchedConfirm: 'Mark every aired episode of this show as watched and move it to Completed?',
 
     seasons: 'Seasons',
     season: (n) => `Season ${n}`,
@@ -215,6 +217,8 @@ const STRINGS = {
       : `لديك ${n} حلقات سابقة غير معلّمة — هل تعتبرها مُشاهدة كلها؟`,
     yesMarkPrev: 'نعم، علّم السابقة',
     noJustThis: 'لا، هذه الحلقة فقط',
+    markAllWatched: 'شاهدت هذا المسلسل من قبل',
+    markAllWatchedConfirm: 'سيتم اعتبار كل الحلقات المعروضة من هذا المسلسل مُشاهدة، ونقله إلى «مكتمل». متابعة؟',
 
     seasons: 'المواسم',
     season: (n) => `الموسم ${n}`,

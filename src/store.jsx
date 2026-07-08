@@ -423,6 +423,25 @@ export function AppProvider({ children }) {
       })
     },
 
+    // "I already watched this whole show" — marks every already-aired
+    // episode across every season and sets status to completed in one go.
+    // Unaired episodes are left alone so the Upcoming calendar and stats
+    // stay honest; existing timestamps are kept.
+    markAllWatched(id) {
+      patchShow(id, (show) => {
+        const today = new Date().toISOString().slice(0, 10)
+        const watched = { ...show.watched }
+        for (const season of show.seasons) {
+          for (const ep of season.episodes) {
+            if (ep.air && ep.air > today) continue
+            const k = `${season.n}:${ep.n}`
+            watched[k] = watched[k] || Date.now()
+          }
+        }
+        return { watched, status: 'completed' }
+      })
+    },
+
     // Mark the next aired-but-unwatched episode (poster quick action).
     markNext(id) {
       patchShow(id, (show) => {

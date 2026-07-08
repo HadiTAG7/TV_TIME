@@ -182,6 +182,17 @@ export default function ShowDetail({ id, onClose }) {
 
         <StatusChips show={show} />
 
+        {show.status !== 'completed' && (
+          <button
+            className="self-start text-label-md text-primary-container flex items-center gap-1 hover:underline"
+            onClick={() => {
+              if (confirm(t('markAllWatchedConfirm'))) actions.markAllWatched(show.id)
+            }}
+          >
+            <Icon name="done_all" className="text-base" /> {t('markAllWatched')}
+          </button>
+        )}
+
         <div className="flex items-center justify-between">
           <span className="text-body-md text-on-surface-variant">{t('yourRating')}</span>
           <RatingStars value={show.rating} onChange={(r) => actions.rateShow(show.id, r)} />
