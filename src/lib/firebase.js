@@ -34,6 +34,11 @@ export async function watchAuth(cb) {
     return () => {}
   }
   const { auth, authMod } = await init()
+  // Complete a pending redirect sign-in (the popup-blocked fallback lands
+  // here after returning from Google). Failures would otherwise be silent.
+  authMod.getRedirectResult(auth).catch((e) => {
+    console.error('[auth] redirect sign-in failed:', e?.code || e)
+  })
   return authMod.onAuthStateChanged(auth, cb)
 }
 

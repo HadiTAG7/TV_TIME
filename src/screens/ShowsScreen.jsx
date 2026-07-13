@@ -90,7 +90,7 @@ export default function ShowsScreen({ onOpenDetail, onOpenSearch }) {
   for (const b of BUCKET_ORDER) buckets[b].sort((a, z) => (z.updatedAt || 0) - (a.updatedAt || 0))
 
   return (
-    <main className="mt-20 px-margin-mobile md:px-margin-desktop max-w-[1440px] mx-auto pb-16">
+    <main className="@container mt-20 px-margin-mobile md:px-margin-desktop max-w-[1440px] mx-auto pb-16">
       <section className="py-md text-center">
         <h2 className="text-headline-lg md:text-headline-xl text-on-surface">{t('yourLibrary')}</h2>
         <p className="text-body-md text-on-surface-variant">{t('trackingActive', activeCount)}</p>
@@ -108,7 +108,9 @@ export default function ShowsScreen({ onOpenDetail, onOpenSearch }) {
                 {t(BUCKET_LABEL_KEYS[bucket])}
               </span>
             </div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 fold:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
+            {/* Container-query columns: adapt to the actual content width,
+                which shrinks when the detail side-pane is open */}
+            <div className="grid grid-cols-3 @md:grid-cols-4 @2xl:grid-cols-5 @4xl:grid-cols-6 gap-2 @md:gap-3">
               {buckets[bucket].map((show) => (
                 <ShowCard
                   key={show.id}

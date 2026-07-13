@@ -78,8 +78,21 @@ function CloudSyncSection() {
     setGoogleError('')
     try {
       await actions.signInGoogle()
-    } catch {
-      setGoogleError(t('signInFailed'))
+    } catch (e) {
+      const code = e?.code || ''
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request' || code === 'auth/user-cancelled') {
+        // User dismissed the popup — not an error worth showing.
+      } else if (code === 'auth/unauthorized-domain') {
+        setGoogleError(t('errUnauthorizedDomain'))
+      } else if (code === 'auth/operation-not-allowed' || code === 'auth/configuration-not-found') {
+        setGoogleError(t('errProviderDisabled'))
+      } else if (code === 'auth/popup-blocked') {
+        setGoogleError(t('errPopupBlocked'))
+      } else if (code === 'auth/network-request-failed') {
+        setGoogleError(t('errAuthNetwork'))
+      } else {
+        setGoogleError(code ? `${t('signInFailed')} (${code})` : t('signInFailed'))
+      }
     } finally {
       setGoogleBusy(false)
     }

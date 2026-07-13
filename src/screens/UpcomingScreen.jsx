@@ -38,7 +38,7 @@ function FeatureCard({ entry, onOpen }) {
   const { show, ep, season } = entry
   return (
     <button
-      className="relative w-full aspect-[16/9] rounded-xl overflow-hidden glass text-start group fade-up"
+      className="relative w-full aspect-[16/9] @2xl:aspect-[21/7] @2xl:col-span-2 rounded-xl overflow-hidden glass text-start group fade-up"
       onClick={onOpen}
     >
       <div className="absolute inset-0">
@@ -97,7 +97,7 @@ export default function UpcomingScreen({ onOpenDetail }) {
   ]
 
   return (
-    <main className="mt-20 px-margin-mobile md:px-margin-desktop max-w-[900px] mx-auto pb-12">
+    <main className="@container mt-20 px-margin-mobile md:px-margin-desktop max-w-[1100px] mx-auto pb-12">
       <section className="py-lg">
         <h2 className="text-headline-lg md:text-headline-xl text-on-surface">{t('upcoming')}</h2>
         <p className="text-body-lg text-on-surface-variant">{t('upcomingSub')}</p>
@@ -120,7 +120,8 @@ export default function UpcomingScreen({ onOpenDetail }) {
               </h3>
               <span className="text-label-md text-on-surface-variant">{sec.side}</span>
             </div>
-            <div className="flex flex-col gap-md">
+            {/* Two columns when the content area is wide enough (container query) */}
+            <div className="grid grid-cols-1 @2xl:grid-cols-2 gap-md">
               {sec.items.map((u, i) =>
                 sec.featured && i === 0 ? (
                   <FeatureCard key={u.show.id} entry={u} onOpen={() => onOpenDetail({ kind: 'tv', id: u.show.id })} />

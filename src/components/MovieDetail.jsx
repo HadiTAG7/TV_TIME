@@ -4,13 +4,14 @@ import RatingStars from './RatingStars.jsx'
 import Sheet from './Sheet.jsx'
 import { useApp } from '../store.jsx'
 
-export default function MovieDetail({ id, onClose }) {
+// variant: 'sheet' (overlay, default) or 'panel' (inline side pane).
+export default function MovieDetail({ id, onClose, variant = 'sheet' }) {
   const { state, actions, t } = useApp()
   const movie = state.movies[id]
   if (!movie) return null
 
-  return (
-    <Sheet open onClose={onClose}>
+  const body = (
+    <>
       <div className="relative aspect-video w-full overflow-hidden">
         {movie.backdrop
           ? <img src={movie.backdrop} alt="" className="w-full h-full object-cover" />
@@ -85,6 +86,27 @@ export default function MovieDetail({ id, onClose }) {
           <Icon name="delete" className="text-base" /> {t('removeFromLibrary')}
         </button>
       </div>
+    </>
+  )
+
+  if (variant === 'panel') {
+    return (
+      <div className="relative min-h-full">
+        <button
+          onClick={onClose}
+          className="absolute top-3 end-3 z-30 w-9 h-9 rounded-full bg-black/50 backdrop-blur flex items-center justify-center hover:bg-black/70 active:scale-90 transition-all"
+          aria-label="close"
+        >
+          <Icon name="close" className="text-white text-xl" />
+        </button>
+        {body}
+      </div>
+    )
+  }
+
+  return (
+    <Sheet open onClose={onClose}>
+      {body}
     </Sheet>
   )
 }

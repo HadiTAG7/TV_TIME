@@ -117,7 +117,7 @@ export default function MoviesScreen({ onOpenDetail, onSearchGenre }) {
     .sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0))
 
   return (
-    <main className="mt-16 md:px-margin-desktop max-w-[1440px] mx-auto">
+    <main className="@container mt-16 md:px-margin-desktop max-w-[1440px] mx-auto">
       <Hero movie={hero} onOpenDetail={onOpenDetail} />
 
       <div className="px-margin-mobile md:px-0 flex flex-col gap-lg py-lg pb-12">
@@ -176,7 +176,7 @@ export default function MoviesScreen({ onOpenDetail, onSearchGenre }) {
             {watchlist.length === 0 ? (
               <p className="text-body-md text-on-surface-variant">{t('emptyWatchlist')}</p>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 fold:grid-cols-4 lg:grid-cols-5 gap-gutter">
+              <div className="grid grid-cols-2 @md:grid-cols-3 @2xl:grid-cols-4 @4xl:grid-cols-5 gap-gutter">
                 {watchlist.map((m) => (
                   <button
                     key={m.id}

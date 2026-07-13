@@ -133,7 +133,9 @@ function SeasonBlock({ show, season, onCheckEpisode }) {
   )
 }
 
-export default function ShowDetail({ id, onClose }) {
+// variant: 'sheet' (overlay, default) or 'panel' (inline side pane for
+// large/foldable screens — content browsable alongside the library).
+export default function ShowDetail({ id, onClose, variant = 'sheet' }) {
   const { state, actions, t } = useApp()
   const [pendingEp, setPendingEp] = useState(null) // { s, e, count }
   const show = state.shows[id]
@@ -146,8 +148,8 @@ export default function ShowDetail({ id, onClose }) {
     else actions.toggleEpisode(show.id, s, e)
   }
 
-  return (
-    <Sheet open onClose={onClose}>
+  const body = (
+    <>
       {/* Header artwork */}
       <div className="relative aspect-video w-full overflow-hidden">
         {show.backdrop
@@ -278,6 +280,27 @@ export default function ShowDetail({ id, onClose }) {
         </div>,
         document.body
       )}
+    </>
+  )
+
+  if (variant === 'panel') {
+    return (
+      <div className="relative min-h-full">
+        <button
+          onClick={onClose}
+          className="absolute top-3 end-3 z-30 w-9 h-9 rounded-full bg-black/50 backdrop-blur flex items-center justify-center hover:bg-black/70 active:scale-90 transition-all"
+          aria-label="close"
+        >
+          <Icon name="close" className="text-white text-xl" />
+        </button>
+        {body}
+      </div>
+    )
+  }
+
+  return (
+    <Sheet open onClose={onClose}>
+      {body}
     </Sheet>
   )
 }
