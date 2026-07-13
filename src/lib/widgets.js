@@ -5,7 +5,7 @@
 import { Capacitor } from '@capacitor/core'
 import { Preferences } from '@capacitor/preferences'
 import { registerPlugin } from '@capacitor/core'
-import { upcomingFor, showProgress } from './progress.js'
+import { allUpcoming, showProgress } from './progress.js'
 import { fmtDate, fmtWeekday, daysFromToday } from './format.js'
 
 // Small poster rendition for widget thumbnails (data saver + fast decode).
@@ -20,7 +20,10 @@ function widgetPoster(url) {
 export function buildWidgetPayload(state, t) {
   const lang = state.settings.lang
 
-  const upcoming = upcomingFor(state.shows).slice(0, 6).map((u) => {
+  // The Android list widget scrolls, so we can surface a long runway of
+  // episodes — every future episode across all shows, not just the next one
+  // per show (matches TV Time's schedule view).
+  const upcoming = allUpcoming(state.shows, 50).map((u) => {
     const d = daysFromToday(u.ep.air)
     const when = d <= 0 ? t('today') : d === 1 ? t('tomorrow') : fmtDate(u.ep.air, lang)
     const date = d <= 0 ? t('today')

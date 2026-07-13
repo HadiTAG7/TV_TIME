@@ -48,6 +48,11 @@
                 android:resource="@xml/widget_progress_info" />
         </receiver>
 
+        <service
+            android:name=".UpcomingRemoteViewsService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"
+            android:exported="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

@@ -47,6 +47,18 @@ final class WidgetData {
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
+    // Template for a collection (ListView) — must be mutable so each row's
+    // fill-in intent can merge into it.
+    static PendingIntent openAppTemplate(Context context) {
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            flags |= PendingIntent.FLAG_MUTABLE;
+        }
+        return PendingIntent.getActivity(context, 1, intent, flags);
+    }
+
     static int dp(Context context, float dp) {
         return Math.round(dp * context.getResources().getDisplayMetrics().density);
     }

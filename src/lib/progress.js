@@ -44,3 +44,23 @@ export function upcomingFor(shows) {
   out.sort((a, b) => a.ep.air.localeCompare(b.ep.air))
   return out
 }
+
+// Every future (or today) episode across all tracked shows, sorted by air
+// date — a TV Time-style schedule where one show can appear several times
+// (e.g. the next three weeks of a weekly series).
+export function allUpcoming(shows, limit = 50) {
+  const today = new Date().toISOString().slice(0, 10)
+  const out = []
+  for (const show of Object.values(shows)) {
+    if (show.status === 'completed' || show.status === 'dropped') continue
+    for (const season of show.seasons) {
+      for (const ep of season.episodes) {
+        if (ep.air && ep.air >= today && !show.watched[`${season.n}:${ep.n}`]) {
+          out.push({ show, season: season.n, ep })
+        }
+      }
+    }
+  }
+  out.sort((a, b) => a.ep.air.localeCompare(b.ep.air))
+  return out.slice(0, limit)
+}
