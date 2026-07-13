@@ -176,7 +176,7 @@ export default function MoviesScreen({ onOpenDetail, onSearchGenre }) {
             {watchlist.length === 0 ? (
               <p className="text-body-md text-on-surface-variant">{t('emptyWatchlist')}</p>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-gutter">
+              <div className="grid grid-cols-2 sm:grid-cols-3 fold:grid-cols-4 lg:grid-cols-5 gap-gutter">
                 {watchlist.map((m) => (
                   <button
                     key={m.id}

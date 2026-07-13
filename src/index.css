@@ -67,6 +67,9 @@
   --spacing-margin-mobile: 16px;
   --spacing-margin-desktop: 48px;
 
+  /* Foldable inner screens (Galaxy Z Fold etc.): ~700px, between sm and md */
+  --breakpoint-fold: 43.75rem;
+
   --radius-sm: 0.25rem;
   --radius-DEFAULT: 0.5rem;
   --radius-md: 0.75rem;

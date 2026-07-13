@@ -453,7 +453,7 @@ export default function ProfileScreen() {
       </section>
 
       {/* Stats */}
-      <section className="grid grid-cols-2 gap-gutter px-margin-mobile pb-lg">
+      <section className="grid grid-cols-2 sm:grid-cols-4 gap-gutter px-margin-mobile pb-lg">
         <StatCard value={stats.moviesWatched} label={t('movies')} />
         <StatCard value={stats.showsTracked} label={t('shows')} />
         <StatCard

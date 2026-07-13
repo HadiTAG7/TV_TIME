@@ -108,7 +108,7 @@ export default function ShowsScreen({ onOpenDetail, onOpenSearch }) {
                 {t(BUCKET_LABEL_KEYS[bucket])}
               </span>
             </div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-4 fold:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
               {buckets[bucket].map((show) => (
                 <ShowCard
                   key={show.id}

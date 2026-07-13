@@ -9,7 +9,7 @@ export default function Sheet({ open, onClose, children }) {
       onClick={onClose}
     >
       <div
-        className="glass w-full md:max-w-2xl max-h-[92dvh] md:max-h-[85dvh] rounded-t-xl md:rounded-xl overflow-y-auto sheet-in relative"
+        className="glass w-full max-w-2xl max-h-[92dvh] md:max-h-[85dvh] rounded-t-xl md:rounded-xl overflow-y-auto sheet-in relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button
