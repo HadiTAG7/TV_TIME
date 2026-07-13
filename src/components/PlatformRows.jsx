@@ -70,13 +70,12 @@ export default function PlatformRows({ onOpenDetail }) {
   }
 
   return (
-    <section className="mt-xl pb-8" data-testid="platform-rows">
-      <h3 className="text-headline-md text-on-surface mb-md">{t('exploreByPlatform')}</h3>
+    <section className="pb-8" data-testid="platform-rows">
       <div className="flex flex-col gap-lg">
         {PLATFORMS.map((p) =>
           !rows[p.id]?.length ? null : (
             <div key={p.id} data-platform={p.name}>
-              <h4 className="text-body-lg font-semibold text-on-surface-variant mb-sm">
+              <h4 className="text-headline-md text-on-surface mb-sm">
                 {t('popularOn', p.name)}
               </h4>
               <div className="flex gap-gutter overflow-x-auto hide-scrollbar pb-2 -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0">

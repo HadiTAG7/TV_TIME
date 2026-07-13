@@ -1,6 +1,5 @@
 import Icon from '../components/Icon.jsx'
 import Poster from '../components/Poster.jsx'
-import PlatformRows from '../components/PlatformRows.jsx'
 import { useApp, showProgress } from '../store.jsx'
 
 // Library buckets, in display order:
@@ -130,8 +129,6 @@ export default function ShowsScreen({ onOpenDetail, onOpenSearch }) {
           <span className="text-label-md text-outline">{t('addNewShow')}</span>
         </button>
       </div>
-
-      <PlatformRows onOpenDetail={onOpenDetail} />
     </main>
   )
 }

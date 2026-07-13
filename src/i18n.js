@@ -5,7 +5,9 @@ const STRINGS = {
     navUpcoming: 'Upcoming',
     navShows: 'Shows',
     navMovies: 'Movies',
+    navTrending: 'Trending',
     navProfile: 'Profile',
+    trendingSub: 'The most popular shows on every platform right now.',
 
     yourLibrary: 'Your Library',
     trackingActive: (n) => `Tracking ${n} active ${n === 1 ? 'show' : 'shows'} this season`,
@@ -145,7 +147,9 @@ const STRINGS = {
     navUpcoming: 'القادمة',
     navShows: 'المسلسلات',
     navMovies: 'الأفلام',
+    navTrending: 'الشائع',
     navProfile: 'حسابي',
+    trendingSub: 'أشهر المسلسلات على كل منصة الآن.',
 
     yourLibrary: 'مكتبتك',
     trackingActive: (n) => `تتابع ${n} ${n === 1 ? 'مسلسلاً' : 'مسلسلات'} هذا الموسم`,

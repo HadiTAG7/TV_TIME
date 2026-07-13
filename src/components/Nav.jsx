@@ -5,6 +5,7 @@ const TABS = [
   { id: 'upcoming', icon: 'calendar_today', labelKey: 'navUpcoming' },
   { id: 'shows', icon: 'tv', labelKey: 'navShows' },
   { id: 'movies', icon: 'movie', labelKey: 'navMovies' },
+  { id: 'trending', icon: 'local_fire_department', labelKey: 'navTrending' },
   { id: 'profile', icon: 'person', labelKey: 'navProfile' },
 ]
 

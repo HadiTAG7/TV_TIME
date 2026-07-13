@@ -8,9 +8,10 @@ import MovieDetail from './components/MovieDetail.jsx'
 import ShowsScreen from './screens/ShowsScreen.jsx'
 import MoviesScreen from './screens/MoviesScreen.jsx'
 import UpcomingScreen from './screens/UpcomingScreen.jsx'
+import TrendingScreen from './screens/TrendingScreen.jsx'
 import ProfileScreen from './screens/ProfileScreen.jsx'
 
-const TAB_IDS = ['upcoming', 'shows', 'movies', 'profile']
+const TAB_IDS = ['upcoming', 'shows', 'movies', 'trending', 'profile']
 
 function initialTab() {
   const hash = location.hash.replace('#/', '')
@@ -44,6 +45,7 @@ function Shell() {
       {tab === 'shows' && <ShowsScreen onOpenDetail={setDetail} onOpenSearch={() => openSearch()} />}
       {tab === 'movies' && <MoviesScreen onOpenDetail={setDetail} onSearchGenre={(g) => openSearch(g)} />}
       {tab === 'upcoming' && <UpcomingScreen onOpenDetail={setDetail} />}
+      {tab === 'trending' && <TrendingScreen onOpenDetail={setDetail} />}
       {tab === 'profile' && <ProfileScreen />}
 
       <BottomNav tab={tab} onTab={setTab} />
