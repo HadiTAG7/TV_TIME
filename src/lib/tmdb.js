@@ -17,8 +17,9 @@ function langParam() {
 
 async function call(path, params, { key } = {}) {
   const url = TMDB_PROXY
-    ? new URL('/api/tmdb' + path, location.origin)
+    ? new URL('/api/tmdb', location.origin)
     : new URL(BASE + path)
+  if (TMDB_PROXY) url.searchParams.set('p', path)
   const isBearer = !TMDB_PROXY && key && key.includes('.')
   if (!TMDB_PROXY && !isBearer && key) url.searchParams.set('api_key', key)
   url.searchParams.set('language', langParam())
