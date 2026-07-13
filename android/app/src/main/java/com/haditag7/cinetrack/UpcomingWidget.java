@@ -46,20 +46,36 @@ public class UpcomingWidget extends AppWidgetProvider {
         for (int id : ids) render(context, manager, id);
     }
 
-    // Poster downloads must run off the main thread; the update is pushed
-    // once the RemoteViews (bitmaps included) is fully built.
+    // Two-pass render:
+    //   1) text only, synchronously — a tiny RemoteViews that always adds
+    //      instantly (this is what fixes "couldn't add widget": packing 6
+    //      poster bitmaps into one transaction can exceed the launcher's
+    //      Binder size limit and get the whole update rejected).
+    //   2) posters loaded off the main thread and pushed as a second update.
+    //      Bitmaps are kept small so even the enriched transaction stays
+    //      comfortably under the limit.
     private static void render(final Context context, final AppWidgetManager manager, final int appWidgetId) {
         Bundle options = manager.getAppWidgetOptions(appWidgetId);
         final int heightDp = options != null
             ? options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0) : 0;
+        try {
+            manager.updateAppWidget(appWidgetId, build(context, heightDp, false));
+        } catch (Exception ignored) { /* widget updates are best-effort */ }
         new Thread(() -> {
             try {
-                manager.updateAppWidget(appWidgetId, build(context, heightDp));
-            } catch (Exception ignored) { /* widget updates are best-effort */ }
+                manager.updateAppWidget(appWidgetId, build(context, heightDp, true));
+            } catch (Exception ignored) { /* posters are a best-effort enhancement */ }
         }).start();
     }
 
-    private static RemoteViews build(Context context, int heightDp) {
+    // Small, fixed poster size (px, not density-scaled) so six of them stay
+    // well within the RemoteViews transaction budget while still looking
+    // crisp in the ~40dp row thumbnail.
+    private static final int POSTER_W = 84;
+    private static final int POSTER_H = 120;
+    private static final float POSTER_RADIUS = 8f;
+
+    private static RemoteViews build(Context context, int heightDp, boolean withPosters) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_upcoming);
         views.setOnClickPendingIntent(R.id.widget_root, WidgetData.openApp(context));
 
@@ -73,10 +89,6 @@ public class UpcomingWidget extends AppWidgetProvider {
 
         JSONArray upcoming = data != null ? data.optJSONArray("upcoming") : null;
         int count = upcoming != null ? Math.min(upcoming.length(), maxRows) : 0;
-
-        int posterW = WidgetData.dp(context, 40);
-        int posterH = WidgetData.dp(context, 57);
-        float radius = WidgetData.dp(context, 5);
 
         for (int i = 0; i < MAX_ROWS; i++) {
             boolean visible = i < count;
@@ -99,8 +111,11 @@ public class UpcomingWidget extends AppWidgetProvider {
             views.setViewVisibility(NETWORK[i], network.isEmpty() ? View.GONE : View.VISIBLE);
             views.setTextViewText(NETWORK[i], network);
 
-            Bitmap poster = WidgetData.loadPoster(context, item.optString("poster", ""), posterW, posterH, radius);
-            if (poster != null) views.setImageViewBitmap(POSTER[i], poster);
+            if (withPosters) {
+                Bitmap poster = WidgetData.loadPoster(
+                    context, item.optString("poster", ""), POSTER_W, POSTER_H, POSTER_RADIUS);
+                if (poster != null) views.setImageViewBitmap(POSTER[i], poster);
+            }
         }
 
         if (count == 0) {
