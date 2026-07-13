@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import Icon from '../components/Icon.jsx'
 import Poster from '../components/Poster.jsx'
-import { useApp, showProgress } from '../store.jsx'
+import { useApp } from '../store.jsx'
+import { showProgress } from '../lib/progress.js'
 import { DEMO_GENRES } from '../lib/demo.js'
 
 function Hero({ movie, onOpenDetail }) {

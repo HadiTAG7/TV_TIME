@@ -79,8 +79,8 @@ function seedState() {
 
 /* ───────────────────────────── derived helpers ─────────────────────────── */
 
-export { showProgress, upcomingFor } from './lib/progress.js'
 import { showProgress, upcomingFor } from './lib/progress.js'
+export { showProgress, upcomingFor }
 
 export function computeStats(state) {
   let episodesWatched = 0
@@ -233,14 +233,6 @@ export function AppProvider({ children }) {
     return () => clearTimeout(syncRef.current.timer)
   }, [state, syncEnabled, doSync])
 
-  // Mirror widget data to native storage (no-op on the web) after changes.
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      import('./lib/widgets.js').then((w) => w.pushWidgetData(stateRef.current, t)).catch(() => {})
-    }, 1500)
-    return () => clearTimeout(timer)
-  }, [state, t])
-
   // On app open, refresh TMDB metadata for every tracked show (each show is
   // throttled to once per 12h inside refreshShow; English-title migration
   // bypasses the throttle once).
@@ -270,6 +262,15 @@ export function AppProvider({ children }) {
   }, [state.settings.lang])
 
   const t = useMemo(() => makeT(state.settings.lang), [state.settings.lang])
+
+  // Mirror widget data to native storage (no-op on the web) after changes.
+  // Must come after `t` is initialized — it's in this effect's deps.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      import('./lib/widgets.js').then((w) => w.pushWidgetData(stateRef.current, t)).catch(() => {})
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [state, t])
   const auth = useMemo(
     () => ({ key: state.settings.tmdbKey.trim(), lang: state.settings.lang }),
     [state.settings.tmdbKey, state.settings.lang]

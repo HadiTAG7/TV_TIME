@@ -1,6 +1,7 @@
 import Icon from '../components/Icon.jsx'
 import Poster from '../components/Poster.jsx'
-import { useApp, showProgress } from '../store.jsx'
+import { useApp } from '../store.jsx'
+import { showProgress } from '../lib/progress.js'
 
 // Library buckets, in display order:
 // watching   — started, and aired episodes remain to watch

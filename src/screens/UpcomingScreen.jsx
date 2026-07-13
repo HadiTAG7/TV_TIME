@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import Icon from '../components/Icon.jsx'
 import Poster from '../components/Poster.jsx'
-import { useApp, upcomingFor } from '../store.jsx'
+import { useApp } from '../store.jsx'
+import { upcomingFor } from '../lib/progress.js'
 import { fmtDate, fmtWeekday, daysFromToday } from '../lib/format.js'
 
 function Row({ entry, onOpen }) {
