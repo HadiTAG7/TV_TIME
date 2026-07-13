@@ -3,6 +3,8 @@ import Icon from '../components/Icon.jsx'
 import Sheet from '../components/Sheet.jsx'
 import { useApp, computeStats, computeAchievements, watchHistory, topGenres } from '../store.jsx'
 import { fmtTotalTime } from '../lib/format.js'
+import { TMDB_PROXY } from '../lib/tmdb.js'
+import { firebaseEnabled } from '../lib/firebase.js'
 import { LANGS } from '../i18n.js'
 
 function StatCard({ value, label }) {
@@ -47,10 +49,12 @@ function QuickRow({ icon, label, onClick, danger = false }) {
 }
 
 function CloudSyncSection() {
-  const { state, actions, t, syncInfo } = useApp()
+  const { state, actions, t, syncInfo, fbUser } = useApp()
   const [token, setToken] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [googleBusy, setGoogleBusy] = useState(false)
+  const [googleError, setGoogleError] = useState('')
   const connected = !!state.settings.syncToken
   const lang = state.settings.lang
 
@@ -69,9 +73,58 @@ function CloudSyncSection() {
     }
   }
 
+  async function googleSignIn() {
+    setGoogleBusy(true)
+    setGoogleError('')
+    try {
+      await actions.signInGoogle()
+    } catch {
+      setGoogleError(t('signInFailed'))
+    } finally {
+      setGoogleBusy(false)
+    }
+  }
+
   const lastSyncText = syncInfo.at
     ? t('lastSync', new Intl.DateTimeFormat(lang === 'ar' ? 'ar' : 'en-US', { hour: 'numeric', minute: '2-digit' }).format(syncInfo.at))
     : t('syncNever')
+
+  // With Firebase configured, Google sign-in is the primary sync path;
+  // once signed in it fully replaces the GitHub-key option in the UI.
+  if (firebaseEnabled && fbUser) {
+    return (
+      <div className="rounded-xl border border-white/10 p-md flex flex-col gap-3 bg-surface-container-low">
+        <div className="flex items-center gap-2">
+          <Icon name="cloud_sync" className="text-primary-container" />
+          <h3 className="text-headline-md text-on-surface">{t('cloudSync')}</h3>
+        </div>
+        <p className="text-body-md text-on-surface flex items-center gap-2">
+          <Icon name="check_circle" filled className="text-primary-container text-base" />
+          <span className="truncate" dir="ltr">{fbUser.email || fbUser.displayName || 'Google'}</span>
+        </p>
+        <p className="text-label-sm text-on-surface-variant">
+          {syncInfo.status === 'syncing' ? t('syncing')
+            : syncInfo.status === 'error' ? t('syncFailed')
+            : lastSyncText}
+        </p>
+        <div className="flex gap-sm">
+          <button
+            onClick={() => actions.syncNow()}
+            disabled={syncInfo.status === 'syncing'}
+            className="px-md py-sm rounded-lg text-label-md bg-primary-container text-[#0d1117] font-bold disabled:opacity-40 active:scale-95 transition-all flex items-center gap-1"
+          >
+            <Icon name="sync" className="text-base" /> {t('syncNow')}
+          </button>
+          <button
+            onClick={() => actions.signOutGoogle()}
+            className="px-md py-sm rounded-lg text-label-md text-error border border-error/30 hover:bg-error/10 transition-colors"
+          >
+            {t('signOut')}
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="rounded-xl border border-white/10 p-md flex flex-col gap-3 bg-surface-container-low">
@@ -79,6 +132,22 @@ function CloudSyncSection() {
         <Icon name="cloud_sync" className="text-primary-container" />
         <h3 className="text-headline-md text-on-surface">{t('cloudSync')}</h3>
       </div>
+
+      {firebaseEnabled && (
+        <>
+          <p className="text-label-sm text-on-surface-variant leading-relaxed">{t('googleSyncHint')}</p>
+          <button
+            onClick={googleSignIn}
+            disabled={googleBusy}
+            className="w-full py-3 rounded-lg bg-primary-container text-[#0d1117] text-label-md font-bold disabled:opacity-40 active:scale-95 transition-all flex items-center justify-center gap-2"
+          >
+            <span className="font-bold text-base leading-none">G</span>
+            {googleBusy ? t('signingIn') : t('signInGoogleBtn')}
+          </button>
+          {googleError && <p className="text-label-sm text-error">{googleError}</p>}
+          <p className="text-label-sm text-on-surface-variant mt-1">{t('orGistAlt')}</p>
+        </>
+      )}
 
       {!connected ? (
         <>
@@ -172,18 +241,20 @@ function SettingsSheet({ open, onClose }) {
           </div>
         </div>
 
-        <div>
-          <label className="text-label-md text-on-surface-variant uppercase tracking-wider">{t('tmdbKey')}</label>
-          <input
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-            onBlur={() => actions.updateSettings({ tmdbKey: key.trim() })}
-            placeholder="eyJhbGciOi… / 32-char key"
-            dir="ltr"
-            className="mt-2 w-full bg-[#121212] border border-white/10 focus:border-primary-container outline-none rounded-lg px-3 py-2.5 text-body-md text-on-surface transition-colors"
-          />
-          <p className="text-label-sm text-on-surface-variant mt-2 leading-relaxed">{t('tmdbKeyHint')}</p>
-        </div>
+        {!TMDB_PROXY && (
+          <div>
+            <label className="text-label-md text-on-surface-variant uppercase tracking-wider">{t('tmdbKey')}</label>
+            <input
+              value={key}
+              onChange={(e) => setKey(e.target.value)}
+              onBlur={() => actions.updateSettings({ tmdbKey: key.trim() })}
+              placeholder="eyJhbGciOi… / 32-char key"
+              dir="ltr"
+              className="mt-2 w-full bg-[#121212] border border-white/10 focus:border-primary-container outline-none rounded-lg px-3 py-2.5 text-body-md text-on-surface transition-colors"
+            />
+            <p className="text-label-sm text-on-surface-variant mt-2 leading-relaxed">{t('tmdbKeyHint')}</p>
+          </div>
+        )}
 
         <div className="flex flex-col gap-sm">
           <QuickRow icon="download" label={t('exportData')} onClick={() => actions.exportData()} />

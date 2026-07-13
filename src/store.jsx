@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, useCallback, u
 import { demoShows, demoMovies, DEMO_SEED } from './lib/demo.js'
 import * as tmdb from './lib/tmdb.js'
 import * as cloud from './lib/cloud.js'
+import * as fb from './lib/firebase.js'
 import { mergeStates, serializeForSync } from './lib/sync.js'
 import { makeT, detectLang } from './i18n.js'
 
@@ -9,8 +10,10 @@ const KEY = 'cinetrack.v1'
 const DAY = 24 * 60 * 60 * 1000
 
 // Default TMDB API key (owner's personal key) so the app works with the real
-// catalog out of the box. Replaceable anytime in Profile → Settings.
-const DEFAULT_TMDB_KEY = 'f94c13fa0f72c474c7761aa22491008d'
+// catalog out of the box. Replaceable anytime in Profile → Settings. In proxy
+// mode (Vercel) the key lives server-side only, so the literal below is
+// dead-code-eliminated out of that bundle entirely.
+const DEFAULT_TMDB_KEY = tmdb.TMDB_PROXY ? '' : 'f94c13fa0f72c474c7761aa22491008d'
 
 /* ───────────────────────── persistence & seeding ───────────────────────── */
 
@@ -196,9 +199,19 @@ const AppCtx = createContext(null)
 export function AppProvider({ children }) {
   const [state, setState] = useState(loadState)
   const [syncInfo, setSyncInfo] = useState({ status: 'idle', at: 0, error: '' })
+  const [fbUser, setFbUser] = useState(null)
   const stateRef = useRef(state)
   stateRef.current = state
+  const fbUserRef = useRef(null)
+  fbUserRef.current = fbUser
   const syncRef = useRef({ lastSnap: '', busy: false, timer: 0 })
+
+  // Track Firebase auth state (no-op when Firebase isn't configured).
+  useEffect(() => {
+    let unsub = () => {}
+    fb.watchAuth((user) => setFbUser(user)).then((u) => { unsub = u })
+    return () => unsub()
+  }, [])
 
   useEffect(() => {
     try {
@@ -207,27 +220,40 @@ export function AppProvider({ children }) {
   }, [state])
 
   // ── cloud sync: pull remote → merge → push if anything changed ──
+  // Two interchangeable backends share the same merge path: Firestore
+  // (when Firebase is configured and the user signed in with Google)
+  // takes precedence, otherwise the GitHub Gist token if connected.
   const doSync = useCallback(async () => {
     const st = stateRef.current
+    const user = fbUserRef.current
     const token = st.settings.syncToken
-    if (!token || syncRef.current.busy) return
+    const provider = fb.firebaseEnabled && user ? 'firebase' : token ? 'gist' : null
+    if (!provider || syncRef.current.busy) return
     syncRef.current.busy = true
     setSyncInfo((s) => ({ ...s, status: 'syncing' }))
     try {
+      let remoteRaw
+      let push
       let gistId = st.settings.gistId
-      if (!gistId) gistId = await cloud.findOrCreateGist(token)
-      const remoteRaw = await cloud.pullGist(token, gistId)
+      if (provider === 'firebase') {
+        remoteRaw = await fb.pullCloud(user.uid)
+        push = (snap) => fb.pushCloud(user.uid, snap)
+      } else {
+        if (!gistId) gistId = await cloud.findOrCreateGist(token)
+        remoteRaw = await cloud.pullGist(token, gistId)
+        push = (snap) => cloud.pushGist(token, gistId, snap)
+      }
       let remote = null
       try { remote = remoteRaw ? JSON.parse(remoteRaw) : null } catch { remote = null }
 
       let merged = remote ? mergeStates(st, remote) : st
-      if (gistId !== st.settings.gistId) {
+      if (provider === 'gist' && gistId !== st.settings.gistId) {
         merged = { ...merged, settings: { ...merged.settings, gistId } }
       }
       const snap = serializeForSync(merged)
       if (snap !== serializeForSync(st) || gistId !== st.settings.gistId) setState(merged)
       const remoteSnap = remote ? serializeForSync({ ...remote, settings: remote.settings || {} }) : ''
-      if (snap !== remoteSnap) await cloud.pushGist(token, gistId, snap)
+      if (snap !== remoteSnap) await push(snap)
       syncRef.current.lastSnap = snap
       setSyncInfo({ status: 'ok', at: Date.now(), error: '' })
     } catch (e) {
@@ -237,14 +263,16 @@ export function AppProvider({ children }) {
     }
   }, [])
 
+  const syncEnabled = (fb.firebaseEnabled && !!fbUser) || !!state.settings.syncToken
+
   // Debounced push after any local change.
   useEffect(() => {
-    if (!state.settings.syncToken) return
+    if (!syncEnabled) return
     if (serializeForSync(state) === syncRef.current.lastSnap) return
     clearTimeout(syncRef.current.timer)
     syncRef.current.timer = setTimeout(doSync, 4000)
     return () => clearTimeout(syncRef.current.timer)
-  }, [state, doSync])
+  }, [state, syncEnabled, doSync])
 
   // On app open, refresh TMDB metadata for every tracked show (each show is
   // throttled to once per 12h inside refreshShow; English-title migration
@@ -258,7 +286,7 @@ export function AppProvider({ children }) {
 
   // Pull when the app opens, becomes visible again, and every 5 minutes.
   useEffect(() => {
-    if (!state.settings.syncToken) return
+    if (!syncEnabled) return
     doSync()
     const onVisible = () => { if (document.visibilityState === 'visible') doSync() }
     document.addEventListener('visibilitychange', onVisible)
@@ -267,7 +295,7 @@ export function AppProvider({ children }) {
       document.removeEventListener('visibilitychange', onVisible)
       clearInterval(interval)
     }
-  }, [state.settings.syncToken, doSync])
+  }, [syncEnabled, doSync])
 
   useEffect(() => {
     document.documentElement.lang = state.settings.lang
@@ -279,7 +307,7 @@ export function AppProvider({ children }) {
     () => ({ key: state.settings.tmdbKey.trim(), lang: state.settings.lang }),
     [state.settings.tmdbKey, state.settings.lang]
   )
-  const hasKey = !!auth.key
+  const hasKey = !!auth.key || tmdb.TMDB_PROXY
 
   // silent: background metadata refreshes don't bump updatedAt, so they never
   // win sync conflicts against real user edits from another device.
@@ -308,6 +336,17 @@ export function AppProvider({ children }) {
 
     // ── cloud sync ──
     syncNow: doSync,
+
+    async signInGoogle() {
+      await fb.signInGoogle()
+      // onAuthStateChanged flips fbUser, which triggers the initial pull.
+    },
+
+    async signOutGoogle() {
+      await fb.signOutGoogle()
+      syncRef.current.lastSnap = ''
+      setSyncInfo({ status: 'idle', at: 0, error: '' })
+    },
 
     async connectSync(token) {
       const login = await cloud.validateToken(token.trim())
@@ -540,8 +579,8 @@ export function AppProvider({ children }) {
   actionsRef.current = actions
 
   const value = useMemo(
-    () => ({ state, actions, t, hasKey, syncInfo }),
-    [state, actions, t, hasKey, syncInfo]
+    () => ({ state, actions, t, hasKey, syncInfo, fbUser }),
+    [state, actions, t, hasKey, syncInfo, fbUser]
   )
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>
 }

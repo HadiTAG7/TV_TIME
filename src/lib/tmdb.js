@@ -1,5 +1,10 @@
-// TMDB API client. Works with either a v3 API key (32-char hex) passed as
-// ?api_key= or a v4 read-access token (JWT) passed as a Bearer header.
+// TMDB API client. Two modes:
+// - Proxy mode (VITE_TMDB_PROXY=1, used on Vercel): calls go to the
+//   same-origin /api/tmdb serverless function, so no API key ever ships
+//   in the client bundle.
+// - Direct mode (default, used on GitHub Pages): calls TMDB directly with
+//   either a v3 API key (?api_key=) or a v4 read token (Bearer header).
+export const TMDB_PROXY = import.meta.env.VITE_TMDB_PROXY === '1'
 const BASE = 'https://api.themoviedb.org/3'
 export const IMG = (path, size = 'w342') =>
   path ? `https://image.tmdb.org/t/p/${size}${path}` : ''
@@ -10,10 +15,12 @@ function langParam() {
   return 'en-US'
 }
 
-async function call(path, params, { key }) {
-  const url = new URL(BASE + path)
-  const isBearer = key.includes('.')
-  if (!isBearer) url.searchParams.set('api_key', key)
+async function call(path, params, { key } = {}) {
+  const url = TMDB_PROXY
+    ? new URL('/api/tmdb' + path, location.origin)
+    : new URL(BASE + path)
+  const isBearer = !TMDB_PROXY && key && key.includes('.')
+  if (!TMDB_PROXY && !isBearer && key) url.searchParams.set('api_key', key)
   url.searchParams.set('language', langParam())
   for (const [k, v] of Object.entries(params || {})) url.searchParams.set(k, v)
   const res = await fetch(url, {

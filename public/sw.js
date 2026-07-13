@@ -22,8 +22,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET') return;
-  // Never cache TMDB API calls — always live data when online.
+  // Never cache API calls — always live data when online.
   if (url.hostname === 'api.themoviedb.org') return;
+  if (url.origin === self.location.origin && url.pathname.startsWith('/api/')) return;
 
   const isSameOrigin = url.origin === self.location.origin;
   const isAsset =

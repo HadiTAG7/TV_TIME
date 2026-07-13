@@ -45,9 +45,25 @@ npm run preview  # معاينة البناء
 
 لاستبدال المفتاح بمفتاحك الخاص: أنشئ حساباً مجانياً في [themoviedb.org](https://www.themoviedb.org/) واطلب مفتاح API، ثم الصقه في **حسابي ← الإعدادات ← مفتاح TMDB API** (يقبل مفتاح v3 أو توكن القراءة v4). ولو حُذف المفتاح يعود التطبيق للكتالوج التجريبي المدمج.
 
-## 🌍 النشر على GitHub Pages
+## 🌍 النشر
 
-المستودع يتضمن Workflow جاهزاً (`.github/workflows/deploy.yml`): فعّل Pages من إعدادات المستودع (Source: GitHub Actions) وسيُنشر تلقائياً عند الدفع إلى `main`. البناء نسبي المسارات فيعمل على أي استضافة ثابتة.
+**GitHub Pages** (الوضع الافتراضي): المستودع يتضمن Workflow جاهزاً (`.github/workflows/deploy.yml`) ينشر تلقائياً عند الدفع. في هذا الوضع يعمل التطبيق بمفتاح TMDB داخل الحزمة ومزامنة GitHub Gist.
+
+**Vercel + Firebase** (الوضع المُوصى به): استورد المستودع في Vercel واضبط متغيرات البيئة الموثقة في `.env.example`:
+- `TMDB_API_KEY` + `VITE_TMDB_PROXY=1` → كل طلبات TMDB تمر عبر دالة السيرفر `api/tmdb/` **فلا يظهر المفتاح في كود المتصفح إطلاقاً**.
+- `VITE_FIREBASE_*` (من مشروع Firebase: فعّل Google في Authentication وأنشئ Firestore) → يظهر **تسجيل الدخول بـ Google** كخيار المزامنة الأساسي، وتُخزَّن المكتبة في مستند `libraries/{uid}` بقواعد أمان تسمح لصاحبها فقط.
+
+قواعد Firestore المطلوبة:
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /libraries/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}
+```
 
 ## 🗂️ البنية
 
