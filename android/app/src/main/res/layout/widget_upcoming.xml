@@ -140,7 +140,7 @@
                 android:maxLines="1" />
         </LinearLayout>
     </LinearLayout>
-    <View
+    <ImageView
         android:id="@+id/sep2"
         android:layout_width="match_parent"
         android:layout_height="1dp"
@@ -239,7 +239,7 @@
                 android:maxLines="1" />
         </LinearLayout>
     </LinearLayout>
-    <View
+    <ImageView
         android:id="@+id/sep3"
         android:layout_width="match_parent"
         android:layout_height="1dp"
@@ -338,7 +338,7 @@
                 android:maxLines="1" />
         </LinearLayout>
     </LinearLayout>
-    <View
+    <ImageView
         android:id="@+id/sep4"
         android:layout_width="match_parent"
         android:layout_height="1dp"
@@ -437,7 +437,7 @@
                 android:maxLines="1" />
         </LinearLayout>
     </LinearLayout>
-    <View
+    <ImageView
         android:id="@+id/sep5"
         android:layout_width="match_parent"
         android:layout_height="1dp"
@@ -536,7 +536,7 @@
                 android:maxLines="1" />
         </LinearLayout>
     </LinearLayout>
-    <View
+    <ImageView
         android:id="@+id/sep6"
         android:layout_width="match_parent"
         android:layout_height="1dp"
