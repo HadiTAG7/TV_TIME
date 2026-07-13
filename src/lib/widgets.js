@@ -6,19 +6,37 @@ import { Capacitor } from '@capacitor/core'
 import { Preferences } from '@capacitor/preferences'
 import { registerPlugin } from '@capacitor/core'
 import { upcomingFor, showProgress } from './progress.js'
-import { fmtDate, daysFromToday } from './format.js'
+import { fmtDate, fmtWeekday, daysFromToday } from './format.js'
+
+// Small poster rendition for widget thumbnails (data saver + fast decode).
+function widgetPoster(url) {
+  if (!url) return ''
+  return url.replace(/\/(w\d+|original)\//, '/w154/')
+}
 
 // Pure + unit-testable: derives both widgets' content from app state.
+// Keys line1/line2 are kept for widgets shipped in older APKs; the
+// TV Time-style widgets read the richer fields (title/ep/network/date/…).
 export function buildWidgetPayload(state, t) {
   const lang = state.settings.lang
 
   const upcoming = upcomingFor(state.shows).slice(0, 6).map((u) => {
     const d = daysFromToday(u.ep.air)
     const when = d <= 0 ? t('today') : d === 1 ? t('tomorrow') : fmtDate(u.ep.air, lang)
+    const date = d <= 0 ? t('today')
+      : d === 1 ? t('tomorrow')
+      : d <= 7 ? fmtWeekday(u.ep.air, lang)
+      : fmtDate(u.ep.air, lang)
     return {
       line1: [when, u.show.network].filter(Boolean).join(' • '),
       line2: `${u.show.name} — S${String(u.season).padStart(2, '0')}E${String(u.ep.n).padStart(2, '0')}`,
       today: d <= 0,
+      title: u.show.name,
+      ep: `S${String(u.season).padStart(2, '0')} | E${String(u.ep.n).padStart(2, '0')}`,
+      network: u.show.network || '',
+      date,
+      time: u.show.airTime || '',
+      poster: widgetPoster(u.show.poster),
     }
   })
 
@@ -35,6 +53,10 @@ export function buildWidgetPayload(state, t) {
         sub: `S${candidate.prog.currentSeason} • E${candidate.prog.seasonWatched}/${candidate.prog.seasonTotal}`,
         pct: candidate.prog.pct,
         pctText: t('percentDone', candidate.prog.pct),
+        next: candidate.prog.nextEp
+          ? `S${String(candidate.prog.nextEp.season).padStart(2, '0')} | E${String(candidate.prog.nextEp.ep.n).padStart(2, '0')}`
+          : '',
+        poster: widgetPoster(candidate.show.poster),
       }
     : null
 

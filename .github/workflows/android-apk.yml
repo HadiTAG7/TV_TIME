@@ -46,8 +46,8 @@ jobs:
 
       - name: Stamp version from run number
         run: |
-          sed -i "s/versionCode 1$/versionCode ${{ github.run_number }}/" android/app/build.gradle
-          sed -i "s/versionName \"1.0\"$/versionName \"1.0.${{ github.run_number }}\"/" android/app/build.gradle
+          sed -i "s/versionCode [0-9]*$/versionCode $((100 + ${{ github.run_number }}))/" android/app/build.gradle
+          sed -i "s/versionName \"[0-9.]*\"$/versionName \"1.1.${{ github.run_number }}\"/" android/app/build.gradle
 
       - name: Build signed release APK
         run: |

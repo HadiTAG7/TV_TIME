@@ -4,71 +4,88 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_bg"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:padding="14dp"
+    android:padding="12dp"
     android:layoutDirection="locale"
     android:textDirection="locale">
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="#FFD700"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        android:maxLines="1" />
-
-    <TextView
-        android:id="@+id/show_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:maxLines="1"
-        android:ellipsize="end" />
+    <ImageView
+        android:id="@+id/poster"
+        android:layout_width="52dp"
+        android:layout_height="74dp"
+        android:layout_marginEnd="12dp"
+        android:scaleType="centerCrop"
+        android:background="#1AFFFFFF"
+        android:importantForAccessibility="no" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="2dp">
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+
         <TextView
-            android:id="@+id/sub"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:id="@+id/title"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#B3FFFFFF"
-            android:textSize="12sp"
-            android:maxLines="1" />
-        <TextView
-            android:id="@+id/pct"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#E9C400"
-            android:textSize="12sp"
+            android:textColor="#F5C518"
+            android:textSize="11sp"
             android:textStyle="bold"
             android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/show_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="2dp">
+            <TextView
+                android:id="@+id/sub"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textColor="#B3FFFFFF"
+                android:textSize="12sp"
+                android:maxLines="1" />
+            <TextView
+                android:id="@+id/pct"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#F5C518"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:maxLines="1" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progress"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:layout_marginTop="7dp"
+            android:progressTint="#F5C518"
+            android:progressBackgroundTint="#33FFFFFF"
+            android:max="100" />
+
+        <TextView
+            android:id="@+id/empty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="#99FFFFFF"
+            android:textSize="13sp"
+            android:visibility="gone" />
     </LinearLayout>
-
-    <ProgressBar
-        android:id="@+id/progress"
-        style="@android:style/Widget.ProgressBar.Horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:layout_marginTop="8dp"
-        android:progressTint="#FFD700"
-        android:progressBackgroundTint="#33FFFFFF"
-        android:max="100" />
-
-    <TextView
-        android:id="@+id/empty"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:textColor="#99FFFFFF"
-        android:textSize="13sp"
-        android:visibility="gone" />
 </LinearLayout>

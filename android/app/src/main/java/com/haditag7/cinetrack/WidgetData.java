@@ -4,8 +4,22 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.graphics.Shader;
 
 import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 // Shared helpers: the web app writes localized widget content into the
 // Capacitor Preferences store ("CapacitorStorage" SharedPreferences file,
@@ -31,5 +45,57 @@ final class WidgetData {
         return PendingIntent.getActivity(
             context, 0, intent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    static int dp(Context context, float dp) {
+        return Math.round(dp * context.getResources().getDisplayMetrics().density);
+    }
+
+    // Poster thumbnail for RemoteViews: downloaded once (disk-cached),
+    // center-cropped to the target size and given rounded corners.
+    // Must be called off the main thread. Returns null on any failure —
+    // the ImageView then just shows its placeholder background.
+    static Bitmap loadPoster(Context context, String url, int wPx, int hPx, float radiusPx) {
+        if (url == null || url.isEmpty() || !url.startsWith("http")) return null;
+        try {
+            File dir = new File(context.getCacheDir(), "widget_posters");
+            //noinspection ResultOfMethodCallIgnored
+            dir.mkdirs();
+            File file = new File(dir, Integer.toHexString(url.hashCode()) + ".jpg");
+            Bitmap src = file.exists() ? BitmapFactory.decodeFile(file.getAbsolutePath()) : null;
+            if (src == null) {
+                HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+                conn.setConnectTimeout(8000);
+                conn.setReadTimeout(8000);
+                try (InputStream in = conn.getInputStream()) {
+                    src = BitmapFactory.decodeStream(in);
+                } finally {
+                    conn.disconnect();
+                }
+                if (src != null) {
+                    try (FileOutputStream out = new FileOutputStream(file)) {
+                        src.compress(Bitmap.CompressFormat.JPEG, 88, out);
+                    }
+                }
+            }
+            if (src == null) return null;
+
+            Bitmap result = Bitmap.createBitmap(wPx, hPx, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(result);
+            float scale = Math.max((float) wPx / src.getWidth(), (float) hPx / src.getHeight());
+            Matrix matrix = new Matrix();
+            matrix.setScale(scale, scale);
+            matrix.postTranslate(
+                (wPx - src.getWidth() * scale) / 2f,
+                (hPx - src.getHeight() * scale) / 2f);
+            BitmapShader shader = new BitmapShader(src, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+            shader.setLocalMatrix(matrix);
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            paint.setShader(shader);
+            canvas.drawRoundRect(new RectF(0, 0, wPx, hPx), radiusPx, radiusPx, paint);
+            return result;
+        } catch (Exception | OutOfMemoryError e) {
+            return null;
+        }
     }
 }
