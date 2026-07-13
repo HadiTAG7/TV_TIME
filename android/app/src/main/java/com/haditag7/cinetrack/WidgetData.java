@@ -47,6 +47,20 @@ final class WidgetData {
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
+    // Opens the app straight to a specific show. The show id rides along as
+    // an extra that MainActivity hands to the web layer to deep-link.
+    static PendingIntent openShow(Context context, String id) {
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("open_show", id);
+        // Unique data per id so distinct shows get distinct PendingIntents
+        // (otherwise FLAG_UPDATE_CURRENT would reuse the first show's extra).
+        intent.setData(android.net.Uri.parse("cinetrack://show/" + id));
+        return PendingIntent.getActivity(
+            context, ("show" + id).hashCode(), intent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
     // Template for a collection (ListView) — must be mutable so each row's
     // fill-in intent can merge into it.
     static PendingIntent openAppTemplate(Context context) {

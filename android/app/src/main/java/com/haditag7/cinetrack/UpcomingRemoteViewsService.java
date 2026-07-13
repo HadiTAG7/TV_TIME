@@ -70,8 +70,12 @@ public class UpcomingRemoteViewsService extends RemoteViewsService {
             Bitmap poster = WidgetData.loadPoster(context, item.optString("poster", ""), POSTER_W, POSTER_H, POSTER_RADIUS);
             if (poster != null) row.setImageViewBitmap(R.id.item_poster, poster);
 
-            // Every row just opens the app (fill-in for the template intent).
-            row.setOnClickFillInIntent(R.id.item_root, new Intent());
+            // Tapping a row opens the app straight to that show. The id is
+            // merged into the ListView's (mutable) template intent.
+            Intent fill = new Intent();
+            String id = item.optString("id", "");
+            if (!id.isEmpty()) fill.putExtra("open_show", id);
+            row.setOnClickFillInIntent(R.id.item_root, fill);
             return row;
         }
     }

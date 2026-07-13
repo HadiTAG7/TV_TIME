@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AppProvider } from './store.jsx'
+import { consumePendingShow } from './lib/deeplink.js'
 import { TopNav, BottomNav } from './components/Nav.jsx'
 import Icon from './components/Icon.jsx'
 import SearchOverlay from './components/SearchOverlay.jsx'
@@ -46,6 +47,24 @@ function Shell() {
     }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
+  }, [])
+
+  // Deep-link from a home-screen widget tap: open the show it points at.
+  // Runs on launch and whenever the app regains focus (a widget tap while
+  // the app is already open resumes it → visibilitychange fires).
+  useEffect(() => {
+    let alive = true
+    const check = async () => {
+      const id = await consumePendingShow()
+      if (id && alive) {
+        setTab('shows')
+        setDetail({ kind: 'tv', id })
+      }
+    }
+    check()
+    const onVisible = () => { if (document.visibilityState === 'visible') check() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => { alive = false; document.removeEventListener('visibilitychange', onVisible) }
   }, [])
 
   const openSearch = (query = '') => setSearch({ query })

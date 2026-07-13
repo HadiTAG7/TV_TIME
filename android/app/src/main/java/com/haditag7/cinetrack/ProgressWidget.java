@@ -35,10 +35,15 @@ public class ProgressWidget extends AppWidgetProvider {
 
     private static RemoteViews build(Context context) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_progress);
-        views.setOnClickPendingIntent(R.id.widget_root, WidgetData.openApp(context));
 
         JSONObject data = WidgetData.read(context);
         JSONObject current = data != null ? data.optJSONObject("current") : null;
+
+        // Tap opens the app straight to this show (falls back to home if we
+        // somehow don't have an id yet).
+        String showId = current != null ? current.optString("id", "") : "";
+        views.setOnClickPendingIntent(R.id.widget_root,
+            showId.isEmpty() ? WidgetData.openApp(context) : WidgetData.openShow(context, showId));
         String title = data != null ? data.optString("currentTitle", "Watching") : "Watching";
         views.setTextViewText(R.id.title, title);
 

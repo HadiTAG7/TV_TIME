@@ -34,6 +34,7 @@ export function buildWidgetPayload(state, t) {
       line1: [when, u.show.network].filter(Boolean).join(' • '),
       line2: `${u.show.name} — S${String(u.season).padStart(2, '0')}E${String(u.ep.n).padStart(2, '0')}`,
       today: d <= 0,
+      id: String(u.show.id),
       title: u.show.name,
       ep: `S${String(u.season).padStart(2, '0')} | E${String(u.ep.n).padStart(2, '0')}`,
       network: u.show.network || '',
@@ -52,6 +53,7 @@ export function buildWidgetPayload(state, t) {
 
   const current = candidate
     ? {
+        id: String(candidate.show.id),
         title: candidate.show.name,
         sub: `S${candidate.prog.currentSeason} • E${candidate.prog.seasonWatched}/${candidate.prog.seasonTotal}`,
         pct: candidate.prog.pct,
