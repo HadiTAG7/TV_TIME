@@ -1,0 +1,12 @@
+{
+  "appId": "com.haditag7.cinetrack",
+  "appName": "CineTrack",
+  "webDir": "dist",
+  "server": {
+    "url": "https://tv-time-mu.vercel.app",
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#0D1117"
+  }
+}

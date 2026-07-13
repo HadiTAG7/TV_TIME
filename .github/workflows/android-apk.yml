@@ -1,0 +1,71 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main, claude/tv-time-alternative-app-90wp8t]
+    paths:
+      - 'android/**'
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'capacitor.config.json'
+      - 'vite.config.js'
+      - '.github/workflows/android-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build web assets
+        run: npm run build
+        env:
+          VITE_TMDB_PROXY: '1'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Capacitor sync
+        run: npx cap sync android
+
+      - name: Stamp version from run number
+        run: |
+          sed -i "s/versionCode 1$/versionCode ${{ github.run_number }}/" android/app/build.gradle
+          sed -i "s/versionName \"1.0\"$/versionName \"1.0.${{ github.run_number }}\"/" android/app/build.gradle
+
+      - name: Build signed release APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Rename artifact
+        run: cp android/app/build/outputs/apk/release/app-release.apk cinetrack.apk
+
+      - name: Publish to the apk-latest release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-latest
+          name: 'CineTrack Android APK (آخر نسخة)'
+          body: |
+            حمّل **cinetrack.apk** وثبّته على أندرويد (فعّل "السماح من مصادر غير معروفة").
+            يتضمن ويدجت "الحلقات القادمة" وويدجت "تقدم مسلسلي".
+            التطبيق يعرض النسخة الحية من https://tv-time-mu.vercel.app فكل تحديثات الواجهة تصله تلقائياً.
+          files: cinetrack.apk
+          make_latest: true

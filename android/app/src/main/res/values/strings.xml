@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CineTrack</string>
+    <string name="title_activity_main">CineTrack</string>
+    <string name="package_name">com.haditag7.cinetrack</string>
+    <string name="custom_url_scheme">com.haditag7.cinetrack</string>
+    <string name="widget_upcoming_label">CineTrack — Upcoming Episodes</string>
+    <string name="widget_progress_label">CineTrack — Show Progress</string>
+</resources>

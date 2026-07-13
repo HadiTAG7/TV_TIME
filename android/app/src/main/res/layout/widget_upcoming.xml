@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:orientation="vertical"
+    android:padding="14dp"
+    android:layoutDirection="locale"
+    android:textDirection="locale">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFD700"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:maxLines="1" />
+
+    <TextView
+        android:id="@+id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="#99FFFFFF"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+    <LinearLayout android:id="@+id/row1" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="10dp" android:visibility="gone">
+        <TextView android:id="@+id/row1_line1" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#E9C400" android:textSize="11sp" android:maxLines="1" />
+        <TextView android:id="@+id/row1_line2" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="14sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/row2" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="8dp" android:visibility="gone">
+        <TextView android:id="@+id/row2_line1" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#E9C400" android:textSize="11sp" android:maxLines="1" />
+        <TextView android:id="@+id/row2_line2" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="14sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/row3" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="8dp" android:visibility="gone">
+        <TextView android:id="@+id/row3_line1" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#E9C400" android:textSize="11sp" android:maxLines="1" />
+        <TextView android:id="@+id/row3_line2" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="14sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/row4" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="8dp" android:visibility="gone">
+        <TextView android:id="@+id/row4_line1" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#E9C400" android:textSize="11sp" android:maxLines="1" />
+        <TextView android:id="@+id/row4_line2" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="14sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+    </LinearLayout>
+</LinearLayout>
