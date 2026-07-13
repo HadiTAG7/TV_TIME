@@ -4,17 +4,21 @@ import Poster from './Poster.jsx'
 import { useApp } from '../store.jsx'
 import { discoverTvByProvider } from '../lib/tmdb.js'
 
-// TMDB watch-provider IDs verified non-empty for the SA region.
-// Rows that come back empty (or error) are hidden automatically.
+// TMDB watch-provider IDs, each queried in a region where the platform
+// actually exists (SA by default; Disney+/HBO Max aren't registered for
+// SA so their popular lists come from US). Rows that come back empty
+// (or error) are hidden automatically.
 const PLATFORMS = [
   { id: 8, name: 'Netflix' },
   { id: 119, name: 'Prime Video' },
+  { id: 337, name: 'Disney+', region: 'US' },
   { id: 350, name: 'Apple TV+' },
+  { id: 1899, name: 'HBO Max', region: 'US' },
   { id: 629, name: 'OSN+' },
   { id: 1715, name: 'Shahid VIP' },
   { id: 630, name: 'STARZPLAY' },
 ]
-const CACHE_KEY = 'cinetrack.discover.v1'
+const CACHE_KEY = 'cinetrack.discover.v2'
 const CACHE_TTL = 6 * 60 * 60 * 1000
 
 export default function PlatformRows({ onOpenDetail }) {
@@ -34,7 +38,7 @@ export default function PlatformRows({ onOpenDetail }) {
     let alive = true
     const auth = { key: state.settings.tmdbKey.trim(), lang: state.settings.lang }
     Promise.all(
-      PLATFORMS.map((p) => discoverTvByProvider(p.id, auth).catch(() => []))
+      PLATFORMS.map((p) => discoverTvByProvider(p.id, auth, p.region || 'SA').catch(() => []))
     ).then((lists) => {
       if (!alive) return
       const fetched = {}
