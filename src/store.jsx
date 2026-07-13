@@ -310,6 +310,18 @@ export function AppProvider({ children }) {
       // onAuthStateChanged flips fbUser, which triggers the initial pull.
     },
 
+    async signInEmail(email, password) {
+      await fb.signInEmail(email, password)
+    },
+
+    async signUpEmail(email, password) {
+      await fb.signUpEmail(email, password)
+    },
+
+    async resetPassword(email) {
+      await fb.resetPassword(email)
+    },
+
     async signOutGoogle() {
       await fb.signOutGoogle()
       syncRef.current.lastSnap = ''

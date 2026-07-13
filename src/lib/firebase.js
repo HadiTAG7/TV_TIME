@@ -57,6 +57,23 @@ export async function signInGoogle() {
   }
 }
 
+// Email/password auth — works everywhere Google OAuth doesn't (e.g. the
+// Android WebView, where Google blocks embedded sign-in).
+export async function signInEmail(email, password) {
+  const { auth, authMod } = await init()
+  await authMod.signInWithEmailAndPassword(auth, email, password)
+}
+
+export async function signUpEmail(email, password) {
+  const { auth, authMod } = await init()
+  await authMod.createUserWithEmailAndPassword(auth, email, password)
+}
+
+export async function resetPassword(email) {
+  const { auth, authMod } = await init()
+  await authMod.sendPasswordResetEmail(auth, email)
+}
+
 export async function signOutGoogle() {
   const { auth, authMod } = await init()
   await authMod.signOut(auth)

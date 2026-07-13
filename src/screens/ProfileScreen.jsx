@@ -55,8 +55,59 @@ function CloudSyncSection() {
   const [error, setError] = useState('')
   const [googleBusy, setGoogleBusy] = useState(false)
   const [googleError, setGoogleError] = useState('')
+  const [email, setEmail] = useState('')
+  const [pass, setPass] = useState('')
+  const [emailBusy, setEmailBusy] = useState('') // '' | 'in' | 'up' | 'reset'
+  const [emailError, setEmailError] = useState('')
+  const [emailNotice, setEmailNotice] = useState('')
   const connected = !!state.settings.syncToken
   const lang = state.settings.lang
+
+  function mapEmailError(code) {
+    switch (code) {
+      case 'auth/invalid-email': return t('errBadEmail')
+      case 'auth/email-already-in-use': return t('errEmailInUse')
+      case 'auth/weak-password': return t('errWeakPassword')
+      case 'auth/invalid-credential':
+      case 'auth/wrong-password':
+      case 'auth/user-not-found': return t('errWrongCreds')
+      case 'auth/too-many-requests': return t('errTooManyTries')
+      case 'auth/operation-not-allowed':
+      case 'auth/configuration-not-found': return t('errEmailProviderDisabled')
+      case 'auth/network-request-failed': return t('errAuthNetwork')
+      default: return code ? `${t('signInFailed')} (${code})` : t('signInFailed')
+    }
+  }
+
+  async function emailAuth(kind) {
+    setEmailError('')
+    setEmailNotice('')
+    if (kind === 'reset') {
+      if (!email.trim()) { setEmailError(t('resetNeedsEmail')); return }
+      setEmailBusy('reset')
+      try {
+        await actions.resetPassword(email.trim())
+        setEmailNotice(t('resetSent'))
+      } catch (e) {
+        setEmailError(mapEmailError(e?.code || ''))
+      } finally {
+        setEmailBusy('')
+      }
+      return
+    }
+    if (!email.trim() || !pass) return
+    setEmailBusy(kind)
+    try {
+      if (kind === 'up') await actions.signUpEmail(email.trim(), pass)
+      else await actions.signInEmail(email.trim(), pass)
+      setEmail('')
+      setPass('')
+    } catch (e) {
+      setEmailError(mapEmailError(e?.code || ''))
+    } finally {
+      setEmailBusy('')
+    }
+  }
 
   async function connect() {
     if (!token.trim()) return
@@ -148,11 +199,65 @@ function CloudSyncSection() {
 
       {firebaseEnabled && (
         <>
-          <p className="text-label-sm text-on-surface-variant leading-relaxed">{t('googleSyncHint')}</p>
+          <p className="text-label-sm text-on-surface-variant leading-relaxed">{t('accountSyncHint')}</p>
+
+          {/* Email/password — the primary path; also the only one that works
+              inside the Android app's WebView (Google blocks OAuth there) */}
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            autoComplete="email"
+            placeholder={t('emailPlaceholder')}
+            dir="ltr"
+            className="w-full bg-[#121212] border border-white/10 focus:border-primary-container outline-none rounded-lg px-3 py-2.5 text-body-md text-on-surface transition-colors"
+          />
+          <input
+            value={pass}
+            onChange={(e) => setPass(e.target.value)}
+            type="password"
+            autoComplete="current-password"
+            placeholder={t('passwordPlaceholder')}
+            dir="ltr"
+            onKeyDown={(e) => { if (e.key === 'Enter') emailAuth('in') }}
+            className="w-full bg-[#121212] border border-white/10 focus:border-primary-container outline-none rounded-lg px-3 py-2.5 text-body-md text-on-surface transition-colors"
+          />
+          <div className="flex gap-sm">
+            <button
+              onClick={() => emailAuth('in')}
+              disabled={!!emailBusy || !email.trim() || !pass}
+              className="flex-1 py-3 rounded-lg bg-primary-container text-[#0d1117] text-label-md font-bold disabled:opacity-40 active:scale-95 transition-all"
+            >
+              {emailBusy === 'in' ? t('signingIn') : t('signInBtn')}
+            </button>
+            <button
+              onClick={() => emailAuth('up')}
+              disabled={!!emailBusy || !email.trim() || !pass}
+              className="flex-1 py-3 rounded-lg bg-surface-container-high text-on-surface text-label-md font-bold disabled:opacity-40 hover:bg-white/10 active:scale-95 transition-all"
+            >
+              {emailBusy === 'up' ? t('signingIn') : t('signUpBtn')}
+            </button>
+          </div>
+          <button
+            onClick={() => emailAuth('reset')}
+            disabled={!!emailBusy}
+            className="self-start text-label-sm text-on-surface-variant hover:text-primary-container hover:underline transition-colors"
+          >
+            {emailBusy === 'reset' ? t('signingIn') : t('forgotPassword')}
+          </button>
+          {emailError && <p className="text-label-sm text-error">{emailError}</p>}
+          {emailNotice && <p className="text-label-sm text-primary-container">{emailNotice}</p>}
+
+          <div className="flex items-center gap-3 my-1">
+            <span className="flex-1 h-px bg-white/10" />
+            <span className="text-label-sm text-on-surface-variant">{t('orDivider')}</span>
+            <span className="flex-1 h-px bg-white/10" />
+          </div>
+
           <button
             onClick={googleSignIn}
             disabled={googleBusy}
-            className="w-full py-3 rounded-lg bg-primary-container text-[#0d1117] text-label-md font-bold disabled:opacity-40 active:scale-95 transition-all flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-lg bg-surface-container-high text-on-surface text-label-md font-bold disabled:opacity-40 hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center gap-2"
           >
             <span className="font-bold text-base leading-none">G</span>
             {googleBusy ? t('signingIn') : t('signInGoogleBtn')}
