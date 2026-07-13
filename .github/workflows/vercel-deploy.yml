@@ -17,6 +17,8 @@ jobs:
       - name: Deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: team_nRoRPm4518GaBLAok7QyMzH7
+          VERCEL_PROJECT_ID: prj_6PI67xnY9FsvKym8qJPJhe1HF9t1
         run: |
           if [ -z "$VERCEL_TOKEN" ]; then
             echo "VERCEL_TOKEN secret not set — skipping Vercel deploy."
