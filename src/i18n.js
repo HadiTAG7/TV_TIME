@@ -19,6 +19,8 @@ const STRINGS = {
     emptyShows: 'Nothing here yet. Add a show to start tracking!',
 
     trendingNow: 'Trending Now',
+    exploreByPlatform: 'Explore by Platform',
+    popularOn: (name) => `Popular on ${name}`,
     viewAll: 'View All',
     myWatchlist: 'My Watchlist',
     manageList: 'Manage List',
@@ -157,6 +159,8 @@ const STRINGS = {
     emptyShows: 'لا يوجد شيء هنا بعد. أضف مسلسلاً لتبدأ المتابعة!',
 
     trendingNow: 'الرائج الآن',
+    exploreByPlatform: 'استكشف حسب المنصة',
+    popularOn: (name) => `الشائع على ${name}`,
     viewAll: 'عرض الكل',
     myWatchlist: 'قائمتي',
     manageList: 'إدارة القائمة',

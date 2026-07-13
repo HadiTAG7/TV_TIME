@@ -55,6 +55,17 @@ export async function trendingMovies(auth) {
   return (data.results || []).slice(0, 12).map(normMovieSummary)
 }
 
+// Most popular shows currently watchable on a given streaming platform.
+export async function discoverTvByProvider(providerId, auth, region = 'SA') {
+  const data = await call('/discover/tv', {
+    with_watch_providers: providerId,
+    watch_region: region,
+    sort_by: 'popularity.desc',
+    include_adult: 'false',
+  }, auth)
+  return (data.results || []).slice(0, 12).map(normTvSummary)
+}
+
 // Full show details with every season's episode list.
 // append_to_response accepts up to ~20 sub-requests, so seasons are chunked.
 export async function tvDetails(tmdbId, auth) {
