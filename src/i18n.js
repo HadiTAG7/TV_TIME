@@ -113,7 +113,8 @@ const STRINGS = {
     spoilerWarning: "You haven't watched this episode yet. Comments will very likely spoil it.",
     showAnyway: 'Show comments anyway',
     tapToReveal: 'Spoiler — tap to reveal',
-    commentsFromTrakt: 'Comments from Trakt.tv ↗',
+    commentsFrom: (src) => `Comments from ${src}`,
+    episodeDiscussion: 'From this episode’s discussion thread',
 
     achFirstSteps: 'First Steps',
     achFirstStepsDesc: 'Watch your first episode',
@@ -290,7 +291,8 @@ const STRINGS = {
     spoilerWarning: 'لم تشاهد هذه الحلقة بعد، والتعليقات غالباً ستحرق أحداثها.',
     showAnyway: 'اعرض التعليقات على أي حال',
     tapToReveal: 'حرق أحداث — اضغط للكشف',
-    commentsFromTrakt: 'التعليقات من Trakt.tv ↗',
+    commentsFrom: (src) => `التعليقات من ${src}`,
+    episodeDiscussion: 'من نقاش هذه الحلقة',
 
     achFirstSteps: 'الخطوة الأولى',
     achFirstStepsDesc: 'شاهد أول حلقة',

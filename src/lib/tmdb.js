@@ -63,6 +63,22 @@ export async function trendingMovies(auth) {
   return (data.results || []).slice(0, 12).map(normMovieSummary)
 }
 
+// Viewer reviews for a whole show. TMDB has no per-episode equivalent (that
+// endpoint 404s), so these are only ever a show-level fallback.
+export async function tvReviews(tmdbId, auth) {
+  const data = await call(`/tv/${tmdbId}/reviews`, {}, auth)
+  return (data.results || []).map((r) => ({
+    id: `tmdb-${r.id}`,
+    user: r.author_details?.username || r.author || 'viewer',
+    text: r.content || '',
+    spoiler: false,
+    likes: 0,
+    replies: 0,
+    rating: r.author_details?.rating || 0,
+    createdAt: r.created_at || '',
+  })).filter((r) => r.text)
+}
+
 // Most popular shows currently watchable on a given streaming platform.
 export async function discoverTvByProvider(providerId, auth, region = 'SA') {
   const data = await call('/discover/tv', {

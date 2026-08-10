@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import Icon from './Icon.jsx'
 import { useApp } from '../store.jsx'
-import { episodeComments, UNAVAILABLE } from '../lib/trakt.js'
+import { fetchEpisodeComments } from '../lib/comments.js'
 import { fmtDate } from '../lib/format.js'
+
+// Where a batch of comments came from, shown so the scope is never ambiguous.
+const SOURCE_LABEL = { trakt: 'Trakt.tv', anilist: 'AniList', tmdb: 'TMDB' }
 
 // One comment. Spoiler-flagged bodies are blurred until tapped.
 function Comment({ c, lang, t }) {
@@ -86,16 +89,18 @@ export default function EpisodeComments({ show, season, ep, onClose }) {
   useEffect(() => {
     let alive = true
     setBusy(true)
-    episodeComments(show.tmdbId, season, ep.n)
-      .then((res) => { if (alive) setData(res) })
-      .catch((e) => {
+    const auth = { key: state.settings.tmdbKey.trim(), lang }
+    fetchEpisodeComments(show, season, ep.n, auth)
+      .then((res) => {
         if (!alive) return
-        if (String(e.message) === UNAVAILABLE) setUnavailable(true)
-        setData({ scope: 'episode', comments: [] })
+        setData(res)
+        setUnavailable(!!res.unavailable)
       })
+      .catch(() => { if (alive) setData({ source: null, scope: 'episode', comments: [] }) })
       .finally(() => { if (alive) setBusy(false) })
     return () => { alive = false }
-  }, [show.tmdbId, season, ep.n])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [show.id, season, ep.n])
 
   const comments = data?.comments || []
 
@@ -156,6 +161,9 @@ export default function EpisodeComments({ show, season, ep, onClose }) {
               {data.scope === 'show' && (
                 <p className="text-label-sm text-on-surface-variant mb-2">{t('showLevelComments')}</p>
               )}
+              {data.source === 'anilist' && (
+                <p className="text-label-sm text-primary-container mb-2">{t('episodeDiscussion')}</p>
+              )}
               <ul>
                 {comments.map((c) => <Comment key={c.id} c={c} lang={lang} t={t} />)}
               </ul>
@@ -163,17 +171,12 @@ export default function EpisodeComments({ show, season, ep, onClose }) {
           )}
         </div>
 
-        {/* Attribution */}
-        {!gateOpen && (
+        {/* Attribution — names whichever source actually supplied these */}
+        {!gateOpen && data?.source && (
           <div className="px-md py-2 border-t border-white/10 flex-none">
-            <a
-              href="https://trakt.tv"
-              target="_blank"
-              rel="noreferrer"
-              className="text-label-sm text-on-surface-variant hover:text-primary-container transition-colors"
-            >
-              {t('commentsFromTrakt')}
-            </a>
+            <span className="text-label-sm text-on-surface-variant">
+              {t('commentsFrom', SOURCE_LABEL[data.source] || data.source)}
+            </span>
           </div>
         )}
       </div>
