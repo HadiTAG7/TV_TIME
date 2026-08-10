@@ -4,6 +4,7 @@ import Icon from './Icon.jsx'
 import Poster from './Poster.jsx'
 import RatingStars from './RatingStars.jsx'
 import Sheet from './Sheet.jsx'
+import EpisodeComments from './EpisodeComments.jsx'
 import { useApp } from '../store.jsx'
 import { showProgress } from '../lib/progress.js'
 import { bucketOf, BUCKET_BAR_COLOR } from '../screens/ShowsScreen.jsx'
@@ -54,7 +55,7 @@ function countPrevUnwatched(show, s, e) {
   return count
 }
 
-function SeasonBlock({ show, season, onCheckEpisode }) {
+function SeasonBlock({ show, season, onCheckEpisode, onOpenComments }) {
   const { state, actions, t } = useApp()
   const lang = state.settings.lang
   const [open, setOpen] = useState(false)
@@ -123,6 +124,18 @@ function SeasonBlock({ show, season, onCheckEpisode }) {
                   {ep.air && (
                     <span className="text-label-sm text-on-surface-variant flex-none">{fmtDate(ep.air, lang)}</span>
                   )}
+                  {/* Community comments — only for TMDB-backed shows, since
+                      the Trakt lookup is keyed by tmdbId (demo shows lack it) */}
+                  {onOpenComments && (
+                    <button
+                      className="flex-none w-7 h-7 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary-container hover:bg-white/10 active:scale-90 transition-all"
+                      onClick={() => onOpenComments(season.n, ep)}
+                      aria-label={`${t('comments')} S${season.n}E${ep.n}`}
+                      title={t('comments')}
+                    >
+                      <Icon name="chat_bubble" className="text-base" />
+                    </button>
+                  )}
                 </li>
               )
             })}
@@ -138,9 +151,12 @@ function SeasonBlock({ show, season, onCheckEpisode }) {
 export default function ShowDetail({ id, onClose, variant = 'sheet' }) {
   const { state, actions, t } = useApp()
   const [pendingEp, setPendingEp] = useState(null) // { s, e, count }
+  const [commentsEp, setCommentsEp] = useState(null) // { season, ep }
   const show = state.shows[id]
   if (!show) return null
   const prog = showProgress(show)
+  // Trakt lookups are keyed by TMDB id, so demo/seed shows have no comments.
+  const canComment = show.source === 'tmdb' && !!show.tmdbId
 
   function onCheckEpisode(s, e) {
     const count = countPrevUnwatched(show, s, e)
@@ -217,7 +233,13 @@ export default function ShowDetail({ id, onClose, variant = 'sheet' }) {
           <h3 className="text-headline-md text-on-surface mb-2">{t('seasons')}</h3>
           <div className="flex flex-col gap-2">
             {show.seasons.map((s) => (
-              <SeasonBlock key={s.n} show={show} season={s} onCheckEpisode={onCheckEpisode} />
+              <SeasonBlock
+                key={s.n}
+                show={show}
+                season={s}
+                onCheckEpisode={onCheckEpisode}
+                onOpenComments={canComment ? (season, ep) => setCommentsEp({ season, ep }) : null}
+              />
             ))}
           </div>
         </div>
@@ -234,6 +256,16 @@ export default function ShowDetail({ id, onClose, variant = 'sheet' }) {
           <Icon name="delete" className="text-base" /> {t('removeFromLibrary')}
         </button>
       </div>
+
+      {/* Community comments for one episode (portals itself to <body>) */}
+      {commentsEp && (
+        <EpisodeComments
+          show={show}
+          season={commentsEp.season}
+          ep={commentsEp.ep}
+          onClose={() => setCommentsEp(null)}
+        />
+      )}
 
       {/* "Mark previous episodes too?" dialog — portaled to <body> because
           the sheet's transform would trap position:fixed inside it */}

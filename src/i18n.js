@@ -105,6 +105,16 @@ const STRINGS = {
     min: 'min',
     loadingSeasons: 'Loading episodes…',
 
+    comments: 'Comments',
+    loadingComments: 'Loading comments…',
+    emptyComments: 'No comments on this episode yet.',
+    commentsUnavailable: 'Comments are only available on the main site.',
+    showLevelComments: 'No comments on this episode — showing comments about the show.',
+    spoilerWarning: "You haven't watched this episode yet. Comments will very likely spoil it.",
+    showAnyway: 'Show comments anyway',
+    tapToReveal: 'Spoiler — tap to reveal',
+    commentsFromTrakt: 'Comments from Trakt.tv ↗',
+
     achFirstSteps: 'First Steps',
     achFirstStepsDesc: 'Watch your first episode',
     achMarathoner: 'Marathoner',
@@ -271,6 +281,16 @@ const STRINGS = {
     runtime: 'المدة',
     min: 'دقيقة',
     loadingSeasons: 'جارٍ تحميل الحلقات…',
+
+    comments: 'التعليقات',
+    loadingComments: 'جارٍ تحميل التعليقات…',
+    emptyComments: 'لا توجد تعليقات على هذه الحلقة بعد.',
+    commentsUnavailable: 'التعليقات متاحة على الموقع الرئيسي فقط.',
+    showLevelComments: 'لا توجد تعليقات على هذه الحلقة — نعرض تعليقات عن المسلسل.',
+    spoilerWarning: 'لم تشاهد هذه الحلقة بعد، والتعليقات غالباً ستحرق أحداثها.',
+    showAnyway: 'اعرض التعليقات على أي حال',
+    tapToReveal: 'حرق أحداث — اضغط للكشف',
+    commentsFromTrakt: 'التعليقات من Trakt.tv ↗',
 
     achFirstSteps: 'الخطوة الأولى',
     achFirstStepsDesc: 'شاهد أول حلقة',
