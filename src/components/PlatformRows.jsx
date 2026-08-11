@@ -2,58 +2,112 @@ import { useEffect, useState } from 'react'
 import Icon from './Icon.jsx'
 import Poster from './Poster.jsx'
 import { useApp } from '../store.jsx'
-import { discoverTvByProvider } from '../lib/tmdb.js'
+import { buildPlatformRows, netflixTop10 } from '../lib/platforms.js'
 
-// TMDB watch-provider IDs, each queried in a region where the platform
-// actually exists (SA by default; Disney+/HBO Max aren't registered for
-// SA so their popular lists come from US). Rows that come back empty
-// (or error) are hidden automatically.
-const PLATFORMS = [
-  { id: 8, name: 'Netflix' },
-  { id: 119, name: 'Prime Video' },
-  { id: 337, name: 'Disney+', region: 'US' },
-  { id: 350, name: 'Apple TV+' },
-  { id: 1899, name: 'HBO Max', region: 'US' },
-  { id: 629, name: 'OSN+' },
-  { id: 1715, name: 'Shahid VIP' },
-  { id: 630, name: 'STARZPLAY' },
-]
-const CACHE_KEY = 'cinetrack.discover.v2'
+// Bumped from v2: the previous payload came from the old
+// discover?sort_by=popularity approach, and a stale cache would keep serving
+// those wrong rows for hours after this fix shipped.
+const CACHE_KEY = 'cinetrack.discover.v3'
 const CACHE_TTL = 6 * 60 * 60 * 1000
+
+function Card({ item, rank, inLib, busy, onOpen }) {
+  // Chart entries with no TMDB match can't be tracked, so they render as a
+  // plain (non-interactive) card rather than a button that would fail.
+  const Tag = item.unmatched ? 'div' : 'button'
+  return (
+    <Tag
+      className={`w-32 md:w-40 flex-none text-start group ${item.unmatched ? 'opacity-70' : ''}`}
+      onClick={item.unmatched ? undefined : onOpen}
+    >
+      <div className="poster-card relative aspect-[2/3] rounded-xl overflow-hidden glass mb-2">
+        <Poster item={item} showTitle={item.unmatched} className="group-hover:scale-110 transition-transform duration-700" />
+        {rank ? (
+          <span className="absolute top-0 start-0 bg-primary-container text-[#0d1117] text-label-md font-bold px-2 py-0.5 rounded-be-lg" dir="ltr">
+            #{rank}
+          </span>
+        ) : null}
+        {item.vote > 0 && (
+          <span className="absolute top-2 end-2 glass rounded-full px-2 py-0.5 text-label-sm text-white flex items-center gap-1">
+            <Icon name="star" filled className="text-primary-container" style={{ fontSize: '12px' }} />
+            {item.vote}
+          </span>
+        )}
+        {inLib && (
+          <span className="absolute bottom-2 start-2 bg-primary-container text-[#0d1117] rounded-full px-2 py-0.5 text-label-sm font-bold">
+            ✓
+          </span>
+        )}
+        {busy && (
+          <span className="absolute inset-0 bg-black/50 flex items-center justify-center">
+            <Icon name="progress_activity" className="animate-spin text-primary-container" />
+          </span>
+        )}
+      </div>
+      <p className="text-body-md font-semibold text-on-surface truncate" dir="auto">{item.name}</p>
+      <p className="text-label-md text-on-surface-variant truncate">
+        {[item.year, item.vote ? `★ ${item.vote}` : ''].filter(Boolean).join(' • ')}
+      </p>
+    </Tag>
+  )
+}
+
+function Row({ title, subtitle, items, state, busyId, onOpen }) {
+  return (
+    <div data-platform={title}>
+      <div className="mb-sm">
+        <h4 className="text-headline-md text-on-surface">{title}</h4>
+        {subtitle && <p className="text-label-sm text-primary-container">{subtitle}</p>}
+      </div>
+      <div className="flex gap-gutter overflow-x-auto hide-scrollbar pb-2 -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0">
+        {items.map((item) => (
+          <Card
+            key={`${item.id}-${item.rank || ''}`}
+            item={item}
+            rank={item.rank}
+            inLib={!!state.shows[item.id]}
+            busy={busyId === item.id}
+            onOpen={() => onOpen(item)}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export default function PlatformRows({ onOpenDetail }) {
   const { state, actions, t, hasKey } = useApp()
-  const [rows, setRows] = useState(null)
+  const [data, setData] = useState(null) // { netflix: [], rows: [] }
+  const [busy, setBusy] = useState(true)
   const [busyId, setBusyId] = useState(null)
 
   useEffect(() => {
-    if (!hasKey) return
+    if (!hasKey) { setBusy(false); return }
     try {
       const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null')
       if (cached && Date.now() - cached.at < CACHE_TTL) {
-        setRows(cached.rows)
+        setData(cached.data)
+        setBusy(false)
         return
       }
     } catch { /* bad cache — refetch */ }
+
     let alive = true
+    setBusy(true)
     const auth = { key: state.settings.tmdbKey.trim(), lang: state.settings.lang }
-    Promise.all(
-      PLATFORMS.map((p) => discoverTvByProvider(p.id, auth, p.region || 'SA').catch(() => []))
-    ).then((lists) => {
+    Promise.all([
+      netflixTop10(auth).catch(() => []),
+      buildPlatformRows(auth).catch(() => []),
+    ]).then(([netflix, rows]) => {
       if (!alive) return
-      const fetched = {}
-      PLATFORMS.forEach((p, i) => { fetched[p.id] = lists[i] })
-      setRows(fetched)
+      const next = { netflix, rows }
+      setData(next)
       try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), rows: fetched }))
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data: next }))
       } catch { /* storage full — rows still shown from memory */ }
-    })
+    }).finally(() => { if (alive) setBusy(false) })
     return () => { alive = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasKey])
-
-  if (!hasKey || !rows) return null
-  if (!PLATFORMS.some((p) => rows[p.id]?.length)) return null
 
   async function open(item) {
     if (state.shows[item.id]) {
@@ -69,54 +123,43 @@ export default function PlatformRows({ onOpenDetail }) {
     }
   }
 
+  if (busy) {
+    return (
+      <p className="text-body-md text-on-surface-variant flex items-center justify-center gap-2 py-lg">
+        <Icon name="progress_activity" className="animate-spin" /> {t('loadingTrending')}
+      </p>
+    )
+  }
+
+  const netflix = data?.netflix || []
+  const rows = data?.rows || []
+  if (!netflix.length && !rows.length) {
+    return <p className="text-body-md text-on-surface-variant text-center py-lg">{t('emptyTrending')}</p>
+  }
+
   return (
     <section className="pb-8" data-testid="platform-rows">
       <div className="flex flex-col gap-lg">
-        {PLATFORMS.map((p) =>
-          !rows[p.id]?.length ? null : (
-            <div key={p.id} data-platform={p.name}>
-              <h4 className="text-headline-md text-on-surface mb-sm">
-                {t('popularOn', p.name)}
-              </h4>
-              <div className="flex gap-gutter overflow-x-auto hide-scrollbar pb-2 -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0">
-                {rows[p.id].map((item) => {
-                  const inLib = !!state.shows[item.id]
-                  return (
-                    <button
-                      key={item.id}
-                      className="w-32 md:w-40 flex-none text-start group"
-                      onClick={() => open(item)}
-                    >
-                      <div className="poster-card relative aspect-[2/3] rounded-xl overflow-hidden glass mb-2">
-                        <Poster item={item} showTitle={false} className="group-hover:scale-110 transition-transform duration-700" />
-                        {item.vote > 0 && (
-                          <span className="absolute top-2 end-2 glass rounded-full px-2 py-0.5 text-label-sm text-white flex items-center gap-1">
-                            <Icon name="star" filled className="text-primary-container" style={{ fontSize: '12px' }} />
-                            {item.vote}
-                          </span>
-                        )}
-                        {inLib && (
-                          <span className="absolute bottom-2 start-2 bg-primary-container text-[#0d1117] rounded-full px-2 py-0.5 text-label-sm font-bold">
-                            ✓
-                          </span>
-                        )}
-                        {busyId === item.id && (
-                          <span className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                            <Icon name="progress_activity" className="animate-spin text-primary-container" />
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-body-md font-semibold text-on-surface truncate" dir="auto">{item.name}</p>
-                      <p className="text-label-md text-on-surface-variant truncate">
-                        {[item.year, item.vote ? `★ ${item.vote}` : ''].filter(Boolean).join(' • ')}
-                      </p>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )
+        {netflix.length > 0 && (
+          <Row
+            title={t('popularOn', 'Netflix')}
+            subtitle={t('officialTop10')}
+            items={netflix}
+            state={state}
+            busyId={busyId}
+            onOpen={open}
+          />
         )}
+        {rows.map((r) => (
+          <Row
+            key={r.id}
+            title={t('popularOn', r.name)}
+            items={r.items}
+            state={state}
+            busyId={busyId}
+            onOpen={open}
+          />
+        ))}
       </div>
     </section>
   )

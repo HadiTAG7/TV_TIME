@@ -79,15 +79,47 @@ export async function tvReviews(tmdbId, auth) {
   })).filter((r) => r.text)
 }
 
-// Most popular shows currently watchable on a given streaming platform.
-export async function discoverTvByProvider(providerId, auth, region = 'SA') {
-  const data = await call('/discover/tv', {
-    with_watch_providers: providerId,
-    watch_region: region,
-    sort_by: 'popularity.desc',
-    include_adult: 'false',
-  }, auth)
-  return (data.results || []).slice(0, 12).map(normTvSummary)
+// What people are actually watching this week. Deliberately NOT
+// /discover/tv?sort_by=popularity.desc — TMDB's `popularity` is a cumulative
+// score dominated by long-running back catalogue (it returns The Mentalist and
+// Law & Order for "popular on Netflix"), whereas this endpoint is recency
+// weighted and matches what viewers would recognise as trending.
+export async function trendingTv(auth, page = 1) {
+  const data = await call('/trending/tv/week', { page }, auth)
+  return (data.results || []).map(normTvSummary)
+}
+
+// Subscription ("flatrate") services streaming a show in one region. Rent/buy
+// storefronts are excluded on purpose — otherwise Amazon's huge purchase
+// catalogue swamps the Prime Video row with titles that aren't on Prime.
+export async function watchProvidersForTv(tmdbId, auth, region = 'SA') {
+  const data = await call(`/tv/${tmdbId}/watch/providers`, {}, auth)
+  const forRegion = data.results?.[region] || {}
+  return (forRegion.flatrate || []).map((p) => ({
+    id: p.provider_id,
+    name: p.provider_name,
+    priority: p.display_priority ?? 999,
+  }))
+}
+
+// The services that genuinely exist in a region, with TMDB's own ordering.
+// Used instead of a hand-maintained list, so platforms that aren't available
+// (Disney+ and HBO Max are not, in SA) simply never appear.
+export async function providerDirectory(auth, region = 'SA') {
+  const data = await call('/watch/providers/tv', { watch_region: region }, auth)
+  const out = {}
+  for (const p of data.results || []) {
+    out[p.provider_id] = { name: p.provider_name, priority: p.display_priority ?? 999 }
+  }
+  return out
+}
+
+// Netflix's official chart gives titles as plain text, so they have to be
+// matched back to TMDB to get a poster and a trackable id.
+export async function searchTvByTitle(title, auth) {
+  const data = await call('/search/tv', { query: title, include_adult: 'false' }, auth)
+  const hit = (data.results || []).find((r) => r.poster_path) || (data.results || [])[0]
+  return hit ? normTvSummary(hit) : null
 }
 
 // Full show details with every season's episode list.
