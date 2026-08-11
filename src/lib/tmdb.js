@@ -89,17 +89,22 @@ export async function trendingTv(auth, page = 1) {
   return (data.results || []).map(normTvSummary)
 }
 
-// Subscription ("flatrate") services streaming a show in one region. Rent/buy
+// Subscription ("flatrate") services streaming a show, per region. Rent/buy
 // storefronts are excluded on purpose — otherwise Amazon's huge purchase
 // catalogue swamps the Prime Video row with titles that aren't on Prime.
-export async function watchProvidersForTv(tmdbId, auth, region = 'SA') {
+// One call already carries every country, so asking for several regions costs
+// nothing extra.
+export async function watchProvidersForTv(tmdbId, auth, regions = ['SA']) {
   const data = await call(`/tv/${tmdbId}/watch/providers`, {}, auth)
-  const forRegion = data.results?.[region] || {}
-  return (forRegion.flatrate || []).map((p) => ({
-    id: p.provider_id,
-    name: p.provider_name,
-    priority: p.display_priority ?? 999,
-  }))
+  const out = {}
+  for (const region of regions) {
+    out[region] = ((data.results?.[region] || {}).flatrate || []).map((p) => ({
+      id: p.provider_id,
+      name: p.provider_name,
+      priority: p.display_priority ?? 999,
+    }))
+  }
+  return out
 }
 
 // The services that genuinely exist in a region, with TMDB's own ordering.

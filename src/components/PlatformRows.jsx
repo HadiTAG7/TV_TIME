@@ -4,10 +4,9 @@ import Poster from './Poster.jsx'
 import { useApp } from '../store.jsx'
 import { buildPlatformRows, netflixTop10 } from '../lib/platforms.js'
 
-// Bumped from v2: the previous payload came from the old
-// discover?sort_by=popularity approach, and a stale cache would keep serving
-// those wrong rows for hours after this fix shipped.
-const CACHE_KEY = 'cinetrack.discover.v3'
+// Bumped whenever the payload shape changes, otherwise a stale cache keeps
+// serving the previous structure for hours after a change ships.
+const CACHE_KEY = 'cinetrack.discover.v4'
 const CACHE_TTL = 6 * 60 * 60 * 1000
 
 function Card({ item, rank, inLib, busy, onOpen }) {
@@ -96,10 +95,10 @@ export default function PlatformRows({ onOpenDetail }) {
     const auth = { key: state.settings.tmdbKey.trim(), lang: state.settings.lang }
     Promise.all([
       netflixTop10(auth).catch(() => []),
-      buildPlatformRows(auth).catch(() => []),
-    ]).then(([netflix, rows]) => {
+      buildPlatformRows(auth).catch(() => ({ global: [], local: [], elsewhere: [] })),
+    ]).then(([netflix, groups]) => {
       if (!alive) return
-      const next = { netflix, rows }
+      const next = { netflix, ...groups }
       setData(next)
       try {
         localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data: next }))
@@ -132,14 +131,26 @@ export default function PlatformRows({ onOpenDetail }) {
   }
 
   const netflix = data?.netflix || []
-  const rows = data?.rows || []
-  if (!netflix.length && !rows.length) {
+  const global = data?.global || []
+  const local = data?.local || []
+  const elsewhere = data?.elsewhere || []
+  if (!netflix.length && !global.length && !local.length) {
     return <p className="text-body-md text-on-surface-variant text-center py-lg">{t('emptyTrending')}</p>
   }
 
   return (
     <section className="pb-8" data-testid="platform-rows">
       <div className="flex flex-col gap-lg">
+        {global.length > 0 && (
+          <Row
+            title={t('globalTrending')}
+            subtitle={t('globalTrendingSub')}
+            items={global}
+            state={state}
+            busyId={busyId}
+            onOpen={open}
+          />
+        )}
         {netflix.length > 0 && (
           <Row
             title={t('popularOn', 'Netflix')}
@@ -150,7 +161,7 @@ export default function PlatformRows({ onOpenDetail }) {
             onOpen={open}
           />
         )}
-        {rows.map((r) => (
+        {local.map((r) => (
           <Row
             key={r.id}
             title={t('popularOn', r.name)}
@@ -160,6 +171,25 @@ export default function PlatformRows({ onOpenDetail }) {
             onOpen={open}
           />
         ))}
+
+        {/* Platforms with no Saudi presence — shown for browsing, but labelled
+            so a title is never mistaken for something you can stream here. */}
+        {elsewhere.length > 0 && (
+          <>
+            <h3 className="text-headline-md text-on-surface-variant mt-sm">{t('notAvailableHere')}</h3>
+            {elsewhere.map((r) => (
+              <Row
+                key={`x-${r.id}`}
+                title={t('popularOn', r.name)}
+                subtitle={t('notAvailableHereSub')}
+                items={r.items}
+                state={state}
+                busyId={busyId}
+                onOpen={open}
+              />
+            ))}
+          </>
+        )}
       </div>
     </section>
   )
